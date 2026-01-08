@@ -19,6 +19,12 @@
       --risk:#fb9a99;
       --very:#cab2d6;
       --blue:#a6cee3;
+      --good-text:#56c26a;
+      --caution-text:#f2b94b;
+      --warn-text:#f28c28;
+      --risk-text:#f05a5a;
+      --very-text:#9d77c6;
+      --blue-text:#4da3d9;
     }
 
     *{box-sizing:border-box}
@@ -274,6 +280,15 @@
     risk: getCss('--risk'),
     very: getCss('--very'),
     blue: getCss('--blue'),
+  };
+
+  const TEXT_COLORS = {
+    good: getCss('--good-text'),
+    caution: getCss('--caution-text'),
+    warn: getCss('--warn-text'),
+    risk: getCss('--risk-text'),
+    very: getCss('--very-text'),
+    blue: getCss('--blue-text'),
   };
 
   const METRICS = [
@@ -829,6 +844,25 @@
     return metric.ranges[metric.ranges.length - 1];
   }
 
+  function categoryTextColor(rangeColor){
+    switch (rangeColor){
+      case COLORS.good:
+        return TEXT_COLORS.good;
+      case COLORS.caution:
+        return TEXT_COLORS.caution;
+      case COLORS.warn:
+        return TEXT_COLORS.warn;
+      case COLORS.risk:
+        return TEXT_COLORS.risk;
+      case COLORS.very:
+        return TEXT_COLORS.very;
+      case COLORS.blue:
+        return TEXT_COLORS.blue;
+      default:
+        return TEXT_COLORS.good;
+    }
+  }
+
   function attachTooltipHandlers(svg, point, metric){
     point.addEventListener('mouseenter', (event) => {
       showTooltip(event, svg, point, metric);
@@ -849,6 +883,7 @@
   function showTooltip(event, svg, point, metric){
     const value = Number(point.dataset.value);
     const category = findCategory(metric, value);
+    const categoryColor = categoryTextColor(category.color);
     const dateLabel = point.dataset.dateFormatted || point.dataset.date || '';
     tooltip.innerHTML = `
       <div class="label">Test Date</div>
@@ -856,7 +891,7 @@
       <div class="label" style="margin-top:8px;">Measurement</div>
       <div>${formatValue(value, metric.key)} ${metric.unit}</div>
       <div class="label" style="margin-top:8px;">Category</div>
-      <div style="color:${category.color}; font-weight:800;">${escapeHtml(category.label)}</div>
+      <div style="color:${categoryColor}; font-weight:800;">${escapeHtml(category.label)}</div>
     `;
 
     positionTooltip(svg, point);
