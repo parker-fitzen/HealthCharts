@@ -495,22 +495,25 @@
   function renderAll(dataRows){
     elCharts.innerHTML = '';
 
+    const card = document.createElement('div');
+    card.className = 'chartCard';
+
     for (const sec of SECTIONS){
-      const section = document.createElement('div');
-      section.className = 'chartCard';
-      section.innerHTML = `
+      const sectionHeader = document.createElement('div');
+      sectionHeader.innerHTML = `
         <div class="sectionTitle">${escapeHtml(sec.title)} ( ${formatSpan(dataRows)} )</div>
         <div class="note">Colored bands are reference categories. The line is your trend. Values are labeled at each measurement.</div>
       `;
+      card.appendChild(sectionHeader);
 
       for (const key of sec.keys){
         const metric = METRICS.find(m => m.key === key);
         const svg = makeChartSvg(dataRows, metric);
-        section.appendChild(svg);
+        card.appendChild(svg);
       }
-
-      elCharts.appendChild(section);
     }
+
+    elCharts.appendChild(card);
   }
 
   function formatSpan(rows){
