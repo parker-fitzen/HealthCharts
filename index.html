@@ -168,6 +168,12 @@
       color: #e2e8f0;
     }
 
+    .sectionBlock + .sectionBlock{
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
+
     .note{
       padding: 0 10px 10px;
       color: var(--muted);
@@ -494,10 +500,12 @@
   // -------------------------
   function renderAll(dataRows){
     elCharts.innerHTML = '';
+    const container = document.createElement('div');
+    container.className = 'chartCard';
 
     for (const sec of SECTIONS){
       const section = document.createElement('div');
-      section.className = 'chartCard';
+      section.className = 'sectionBlock';
       section.innerHTML = `
         <div class="sectionTitle">${escapeHtml(sec.title)} ( ${formatSpan(dataRows)} )</div>
         <div class="note">Colored bands are reference categories. The line is your trend. Values are labeled at each measurement.</div>
@@ -509,8 +517,10 @@
         section.appendChild(svg);
       }
 
-      elCharts.appendChild(section);
+      container.appendChild(section);
     }
+
+    elCharts.appendChild(container);
   }
 
   function formatSpan(rows){
