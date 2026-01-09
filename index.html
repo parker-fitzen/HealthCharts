@@ -6,39 +6,39 @@
   <title>Health Metrics Grapher</title>
   <style>
     :root{
-      --bg:#0b0f14;
-      --panel:#111827;
-      --panel2:#0f172a;
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --border:rgba(255,255,255,.10);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --good:#d9f0a3;
-      --caution:#fdedb3;
-      --warn:#fdbf6f;
-      --risk:#fb9a99;
-      --very:#cab2d6;
-      --blue:#a6cee3;
-      --good-text:#56c26a;
-      --caution-text:#f2e94b;
-      --warn-text:#f2a828;
-      --risk-text:#f05a5a;
-      --very-text:#9d77c6;
-      --blue-text:#5db3e9;
+      --bg:#f7f3ff;
+      --panel:#ffffff;
+      --panel2:#f2f6ff;
+      --text:#1f2a44;
+      --muted:#5b6b88;
+      --border:rgba(31,42,68,.12);
+      --shadow: 0 12px 30px rgba(67, 78, 98, .12);
+      --good:#cfead2;
+      --caution:#fde7c2;
+      --warn:#ffd6c9;
+      --risk:#f8c8dd;
+      --very:#d8ccf2;
+      --blue:#c6ddf5;
+      --good-text:#3a7c4a;
+      --caution-text:#b7791f;
+      --warn-text:#c05621;
+      --risk-text:#9f1239;
+      --very-text:#6b46c1;
+      --blue-text:#1d4ed8;
     }
 
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 800px at 15% 10%, rgba(56,189,248,.10), transparent 60%),
-                  radial-gradient(1000px 700px at 80% 20%, rgba(167,139,250,.10), transparent 55%),
+      background: radial-gradient(1200px 800px at 15% 10%, rgba(191,219,254,.55), transparent 60%),
+                  radial-gradient(1000px 700px at 80% 20%, rgba(216,204,242,.65), transparent 55%),
                   var(--bg);
       color:var(--text);
     }
 
     header{
-      padding: 22px 18px 14px;
+      padding: 16px 16px 8px;
       max-width: 1100px;
       margin: 0 auto;
     }
@@ -53,23 +53,23 @@
       margin:0;
       color:var(--muted);
       font-size: 14px;
-      line-height: 1.35;
+      line-height: 1.5;
     }
 
     .row{
       display:flex;
-      gap:14px;
+      gap:12px;
       flex-wrap:wrap;
       align-items:stretch;
       max-width:1100px;
-      margin: 12px auto 24px;
-      padding: 0 18px;
+      margin: 8px auto 16px;
+      padding: 0 16px;
     }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.88));
       border:1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       box-shadow: var(--shadow);
       padding: 14px;
       flex: 1 1 420px;
@@ -95,8 +95,8 @@
     input[type=file]{
       padding: 10px;
       border-radius: 12px;
-      border:1px dashed rgba(255,255,255,.25);
-      background: rgba(255,255,255,.03);
+      border:1px dashed rgba(31,42,68,.25);
+      background: rgba(255,255,255,.8);
       color: var(--text);
       width: 100%;
       max-width: 520px;
@@ -105,7 +105,7 @@
     button{
       appearance:none;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.06);
+      background: rgba(99, 102, 241, 0.12);
       color: var(--text);
       padding: 10px 12px;
       border-radius: 12px;
@@ -113,7 +113,7 @@
       font-weight: 700;
     }
 
-    button:hover{ background: rgba(255,255,255,.10); }
+    button:hover{ background: rgba(99, 102, 241, 0.2); }
 
     .hint{
       margin-top: 10px;
@@ -122,16 +122,43 @@
       line-height: 1.4;
     }
 
+    .setupNote{
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .linkButton{
+      border: none;
+      background: none;
+      color: #4f46e5;
+      font-weight: 800;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .linkButton:hover{
+      color: #4338ca;
+    }
+
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(31,42,68,.12);
       padding: 10px;
       border-radius: 12px;
       overflow:auto;
       white-space: pre;
       font-size: 12px;
-      color:#d1d5db;
+      color:#334155;
     }
 
     .status{
@@ -144,17 +171,17 @@
 
     .charts{
       max-width: 1100px;
-      margin: 0 auto 38px;
-      padding: 0 18px;
+      margin: 0 auto 32px;
+      padding: 0 16px;
       display: grid;
       grid-template-columns: 1fr;
       gap: 14px;
     }
 
     .chartCard{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.85));
       border:1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       box-shadow: var(--shadow);
       padding: 10px;
     }
@@ -162,7 +189,7 @@
     .chartTitle{
       padding: 10px 10px 0;
       font-weight: 900;
-      color: #e2e8f0;
+      color: #1f2a44;
       letter-spacing: .2px;
     }
 
@@ -171,7 +198,7 @@
       padding: 0 10px;
       font-weight: 900;
       font-size: 16px;
-      color: #e2e8f0;
+      color: #1f2a44;
     }
 
     .sectionBlock + .sectionBlock{
@@ -188,7 +215,7 @@
 
     .chartTooltip{
       position: fixed;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(255,255,255,0.98);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 10px 12px;
@@ -220,10 +247,195 @@
     .footerNote{
       max-width:1100px;
       margin: 0 auto;
-      padding: 0 18px 26px;
+      padding: 0 16px 26px;
       color: var(--muted);
       font-size: 12px;
       line-height:1.4;
+    }
+
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(148, 163, 184, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .modalOverlay.show{
+      display: flex;
+    }
+
+    .modal{
+      width: min(360px, 92vw);
+      min-height: 520px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modalHeader{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modalTitle{
+      font-size: 16px;
+      font-weight: 800;
+      color: #1f2a44;
+    }
+
+    .modalBody{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(243, 244, 255, 0.7);
+      min-height: 250px;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modalFooter{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+    }
+
+    .modalFooter .controls{
+      justify-content: space-between;
+    }
+
+    .ghostButton{
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .closeButton{
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 113, 113, 0.6);
+      background: rgba(254, 202, 202, 0.6);
+      color: #b91c1c;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+
+    .closeButton:hover{
+      background: rgba(254, 202, 202, 0.9);
+    }
+
+    .dotTabs{
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .dot{
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.6);
+    }
+
+    .dot.active{
+      background: #6366f1;
+      width: 10px;
+      height: 10px;
+    }
+
+    .listSteps{
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .metricList{
+      display: grid;
+      gap: 8px;
+      margin: 0;
+    }
+
+    .metricItem{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .templateBox{
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,.9);
+      padding: 12px;
+    }
+
+    .templateCopy{
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .templateText{
+      width: 100%;
+      min-height: 120px;
+      border: none;
+      background: transparent;
+      resize: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: #334155;
+    }
+
+    @media (max-width: 720px){
+      header{
+        padding: 14px 14px 6px;
+      }
+
+      h1{
+        font-size: 20px;
+      }
+
+      .row,
+      .charts,
+      .footerNote{
+        padding: 0 14px;
+      }
+
+      .card{
+        min-width: 100%;
+      }
+
+      .controls{
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button{
+        width: 100%;
+      }
     }
 
     /* SVG text rendering */
@@ -244,6 +456,11 @@
         <button id="btnSample" type="button">Load sample</button>
       </div>
       <div id="status" class="status">No file loaded.</div>
+      <div id="preview" class="mono">(upload a CSV)</div>
+      <div class="setupNote">
+        <span>Don't have a Health Charts CSV?</span>
+        <button id="openSetup" class="linkButton" type="button">Get one set up here!</button>
+      </div>
     </div>
   </div>
 
@@ -251,6 +468,26 @@
 
   <div class="footerNote">
     Bands are common adult reference categories. Targets can differ by personal risk factors/conditions; use this for visualization, not diagnosis.
+  </div>
+
+  <div id="setupModal" class="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <div class="modal">
+      <div class="modalHeader">
+        <div>
+          <div id="setupTitle" class="modalTitle">Health Charts CSV Setup</div>
+          <div class="sub">Follow the steps to build your custom template.</div>
+        </div>
+        <button id="closeSetup" class="closeButton" type="button" aria-label="Close setup dialog">×</button>
+      </div>
+      <div class="modalBody" id="setupBody"></div>
+      <div class="modalFooter">
+        <div class="controls">
+          <button id="backSetup" class="ghostButton" type="button">Back</button>
+          <button id="nextSetup" type="button">Next</button>
+        </div>
+        <div class="dotTabs" id="setupDots" aria-hidden="true"></div>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -346,6 +583,16 @@
   const btnSample = document.getElementById('btnSample');
   const btnClear = document.getElementById('btnClear');
   const tooltip = createTooltip();
+  const setupModal = document.getElementById('setupModal');
+  const setupBody = document.getElementById('setupBody');
+  const setupDots = document.getElementById('setupDots');
+  const btnOpenSetup = document.getElementById('openSetup');
+  const btnCloseSetup = document.getElementById('closeSetup');
+  const btnNextSetup = document.getElementById('nextSetup');
+  const btnBackSetup = document.getElementById('backSetup');
+  let setupStep = 0;
+  const setupSteps = 5;
+  const selectedMetrics = new Set(METRICS.map((m) => m.key));
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -364,6 +611,32 @@
     handleCsvText(sample, 'sample.csv');
   });
 
+  btnOpenSetup.addEventListener('click', () => {
+    setupStep = 0;
+    updateSetupStep();
+    setupModal.classList.add('show');
+  });
+
+  btnCloseSetup.addEventListener('click', () => {
+    setupModal.classList.remove('show');
+  });
+
+  setupModal.addEventListener('click', (event) => {
+    if (event.target === setupModal){
+      setupModal.classList.remove('show');
+    }
+  });
+
+  btnNextSetup.addEventListener('click', () => {
+    setupStep = Math.min(setupStep + 1, setupSteps - 1);
+    updateSetupStep();
+  });
+
+  btnBackSetup.addEventListener('click', () => {
+    setupStep = Math.max(setupStep - 1, 0);
+    updateSetupStep();
+  });
+
   btnClear.addEventListener('click', () => {
     elFile.value = '';
     elPreview.textContent = '(upload a CSV)';
@@ -374,6 +647,111 @@
   function setStatus(msg, isError){
     elStatus.textContent = msg;
     elStatus.className = 'status' + (isError ? ' error' : '');
+  }
+
+  function updateSetupStep(){
+    btnBackSetup.disabled = setupStep === 0;
+    btnNextSetup.textContent = setupStep === setupSteps - 1 ? 'Finish' : 'Next';
+    setupDots.innerHTML = Array.from({ length: setupSteps })
+      .map((_, idx) => `<span class="dot ${idx === setupStep ? 'active' : ''}"></span>`)
+      .join('');
+
+    const bodies = [
+      `
+        <strong>Welcome to Health Charts.</strong>
+        <p class="sub">
+          Everything you do after this page loads happens locally on your device. No CSV data is uploaded or sent anywhere.
+          We only count that someone used the website for basic analytics — all health details stay on your computer.
+        </p>
+        <p class="sub">Your file is read locally in your browser so charts can be generated without sending anything externally.</p>
+      `,
+      `
+        <strong>How it works</strong>
+        <ol class="listSteps">
+          <li>Choose which metrics you want to track (you can leave any metric blank on a given test).</li>
+          <li>Copy the template, paste it into a spreadsheet, and save it as a CSV.</li>
+          <li>Select that CSV here to visualize your results.</li>
+        </ol>
+      `,
+      `
+        <strong>Choose which metrics to include:</strong>
+        <div class="metricList">
+          ${METRICS.map((metric) => `
+            <label class="metricItem">
+              <input type="checkbox" data-metric="${metric.key}" ${selectedMetrics.has(metric.key) ? 'checked' : ''} />
+              ${metric.title}
+            </label>
+          `).join('')}
+        </div>
+      `,
+      `
+        <strong>Your Template is Ready!</strong>
+        <div class="templateBox">
+          <button class="templateCopy" id="copyTemplate" type="button">Copy</button>
+          <textarea class="templateText" id="templateText" readonly></textarea>
+        </div>
+        <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
+      `,
+      `
+        <strong>Tutorial coming soon</strong>
+        <p class="sub">(tutorial coming soon)</p>
+      `,
+    ];
+
+    setupBody.innerHTML = bodies[setupStep] ?? bodies[0];
+    if (setupStep === 2){
+      setupBody.querySelectorAll('input[type="checkbox"][data-metric]').forEach((input) => {
+        input.addEventListener('change', (event) => {
+          const key = event.target.dataset.metric;
+          if (!key) return;
+          if (event.target.checked){
+            selectedMetrics.add(key);
+          } else {
+            selectedMetrics.delete(key);
+          }
+        });
+      });
+    }
+
+    if (setupStep === 3){
+      const templateText = setupBody.querySelector('#templateText');
+      if (templateText){
+        templateText.value = buildTemplateText();
+      }
+      const copyBtn = setupBody.querySelector('#copyTemplate');
+      if (copyBtn){
+        copyBtn.addEventListener('click', () => {
+          const text = buildTemplateText();
+          if (navigator.clipboard?.writeText){
+            navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+          } else {
+            fallbackCopy(text);
+          }
+        });
+      }
+    }
+  }
+
+  function buildTemplateText(){
+    const metrics = METRICS.map((m) => m.key).filter((key) => selectedMetrics.has(key));
+    const header = ['Date', ...metrics].join(',');
+    const example = ['MM/DD/YYYY', ...metrics.map(() => '')].join(',');
+    return `${header}\n${example}`;
+  }
+
+  function fallbackCopy(text){
+    const temp = document.createElement('textarea');
+    temp.value = text;
+    temp.style.position = 'fixed';
+    temp.style.opacity = '0';
+    document.body.appendChild(temp);
+    temp.focus();
+    temp.select();
+    try{
+      document.execCommand('copy');
+    } finally {
+      document.body.removeChild(temp);
+    }
   }
 
   // -------------------------
@@ -619,14 +997,14 @@
     svg.appendChild(textEl(metric.title, margin.left, 18, {
       size: 15,
       weight: 900,
-      fill: '#e5e7eb'
+      fill: '#1f2a44'
     }));
 
     // Y-axis label
     svg.appendChild(textEl(metric.unit, 14, margin.top + plotH/2, {
       size: 12,
       weight: 800,
-      fill: '#94a3b8',
+      fill: '#5b6b88',
       rotate: -90,
       rotateOrigin: `14 ${margin.top + plotH/2}`
     }));
@@ -646,7 +1024,7 @@
       const lbl = textEl(r.label, margin.left + plotW + 10, yMid + 4, {
         size: 11,
         weight: 800,
-        fill: '#d1d5db'
+        fill: '#4b5563'
       });
       svg.appendChild(lbl);
     }
@@ -656,27 +1034,27 @@
     for (let i=0; i<=gridCount; i++){
       const v = (yTop / gridCount) * i;
       const yy = y(v);
-      svg.appendChild(line(margin.left, yy, margin.left + plotW, yy, 'rgba(255,255,255,0.10)', 1, '4,4'));
+      svg.appendChild(line(margin.left, yy, margin.left + plotW, yy, 'rgba(31,42,68,0.12)', 1, '4,4'));
       svg.appendChild(textEl(formatTick(v, metric.key), margin.left - 8, yy + 4, {
         size: 11,
         weight: 700,
-        fill: '#cbd5e1',
+        fill: '#475569',
         anchor: 'end'
       }));
     }
 
     // X axis baseline
-    svg.appendChild(line(margin.left, margin.top + plotH, margin.left + plotW, margin.top + plotH, 'rgba(255,255,255,0.20)', 1.2));
+    svg.appendChild(line(margin.left, margin.top + plotH, margin.left + plotW, margin.top + plotH, 'rgba(31,42,68,0.2)', 1.2));
 
     // X ticks (auto)
     const ticks = makeTimeTicks(xMin, xMax, 5);
     for (const t of ticks){
       const xx = margin.left + ((t - xMin) / (xMax - xMin)) * plotW;
-      svg.appendChild(line(xx, margin.top + plotH, xx, margin.top + plotH + 6, 'rgba(255,255,255,0.20)', 1));
+      svg.appendChild(line(xx, margin.top + plotH, xx, margin.top + plotH + 6, 'rgba(31,42,68,0.2)', 1));
       svg.appendChild(textEl(formatDateTick(new Date(t), xMin, xMax), xx, margin.top + plotH + 22, {
         size: 11,
         weight: 700,
-        fill: '#cbd5e1',
+        fill: '#475569',
         anchor: 'middle'
       }));
     }
@@ -692,7 +1070,7 @@
       const pEl = elNS('path');
       pEl.setAttribute('d', path);
       pEl.setAttribute('fill', 'none');
-      pEl.setAttribute('stroke', '#0b0f14');
+      pEl.setAttribute('stroke', '#1f2a44');
       pEl.setAttribute('stroke-width', '4');
       pEl.setAttribute('opacity', '0.55');
       svg.appendChild(pEl);
@@ -700,7 +1078,7 @@
       const pEl2 = elNS('path');
       pEl2.setAttribute('d', path);
       pEl2.setAttribute('fill', 'none');
-      pEl2.setAttribute('stroke', '#000');
+      pEl2.setAttribute('stroke', '#4b5563');
       pEl2.setAttribute('stroke-width', '2.5');
       svg.appendChild(pEl2);
 
@@ -708,7 +1086,7 @@
       for (const p of pts){
         const cx = x(p.d);
         const cy = y(p.v);
-        const point = circle(cx, cy, 4.5, '#000');
+        const point = circle(cx, cy, 4.5, '#4b5563');
         point.classList.add('dataPoint');
         point.dataset.value = String(p.v);
         point.dataset.date = p.rawDate || '';
@@ -731,11 +1109,11 @@
         const bx = cx - boxW/2;
         const by = cy - 22 - boxH/2;
 
-        svg.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.92)'));
+        svg.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
         svg.appendChild(textEl(label, cx, by + boxH/2 + 4, {
           size: 12,
           weight: 900,
-          fill: '#0b0f14',
+          fill: '#1f2a44',
           anchor: 'middle'
         }));
       }
