@@ -6,39 +6,41 @@
   <title>Health Metrics Grapher</title>
   <style>
     :root{
-      --bg:#0b0f14;
-      --panel:#111827;
-      --panel2:#0f172a;
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --border:rgba(255,255,255,.10);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --good:#d9f0a3;
-      --caution:#fdedb3;
-      --warn:#fdbf6f;
-      --risk:#fb9a99;
-      --very:#cab2d6;
-      --blue:#a6cee3;
-      --good-text:#56c26a;
-      --caution-text:#f2e94b;
-      --warn-text:#f2a828;
-      --risk-text:#f05a5a;
-      --very-text:#9d77c6;
-      --blue-text:#5db3e9;
+      --bg:#f6f3ff;
+      --panel:#ffffff;
+      --panel2:#f1f5ff;
+      --text:#1f2937;
+      --muted:#64748b;
+      --border:rgba(100,116,139,.20);
+      --shadow: 0 12px 30px rgba(148,163,184,.25);
+      --good:#dff3d6;
+      --caution:#faefc5;
+      --warn:#fde2c1;
+      --risk:#f7cbd0;
+      --very:#d9d2f4;
+      --blue:#cfe8fb;
+      --good-text:#1f7a40;
+      --caution-text:#8c6b0a;
+      --warn-text:#a5631c;
+      --risk-text:#a94852;
+      --very-text:#6a4f9a;
+      --blue-text:#2b7db8;
+      --accent:#7c8cf5;
+      --accent-soft:rgba(124,140,245,.15);
     }
 
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 800px at 15% 10%, rgba(56,189,248,.10), transparent 60%),
-                  radial-gradient(1000px 700px at 80% 20%, rgba(167,139,250,.10), transparent 55%),
+      background: radial-gradient(1200px 800px at 15% 10%, rgba(148,163,255,.20), transparent 60%),
+                  radial-gradient(1000px 700px at 80% 20%, rgba(253,230,203,.28), transparent 55%),
                   var(--bg);
       color:var(--text);
     }
 
     header{
-      padding: 22px 18px 14px;
+      padding: 18px 18px 10px;
       max-width: 1100px;
       margin: 0 auto;
     }
@@ -58,20 +60,20 @@
 
     .row{
       display:flex;
-      gap:14px;
+      gap:12px;
       flex-wrap:wrap;
       align-items:stretch;
       max-width:1100px;
-      margin: 12px auto 24px;
+      margin: 10px auto 20px;
       padding: 0 18px;
     }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(248,250,255,.9));
       border:1px solid var(--border);
       border-radius: 16px;
       box-shadow: var(--shadow);
-      padding: 14px;
+      padding: 12px 14px;
       flex: 1 1 420px;
       min-width: 320px;
     }
@@ -95,8 +97,8 @@
     input[type=file]{
       padding: 10px;
       border-radius: 12px;
-      border:1px dashed rgba(255,255,255,.25);
-      background: rgba(255,255,255,.03);
+      border:1px dashed rgba(124,140,245,.4);
+      background: rgba(255,255,255,.7);
       color: var(--text);
       width: 100%;
       max-width: 520px;
@@ -105,7 +107,7 @@
     button{
       appearance:none;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.06);
+      background: rgba(124,140,245,.18);
       color: var(--text);
       padding: 10px 12px;
       border-radius: 12px;
@@ -113,7 +115,7 @@
       font-weight: 700;
     }
 
-    button:hover{ background: rgba(255,255,255,.10); }
+    button:hover{ background: rgba(124,140,245,.28); }
 
     .hint{
       margin-top: 10px;
@@ -122,16 +124,43 @@
       line-height: 1.4;
     }
 
+    .setupNote{
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .linkButton{
+      border: none;
+      background: none;
+      color: #5b6df0;
+      font-weight: 800;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .linkButton:hover{
+      color: #4c5ce0;
+    }
+
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(226,232,240,.45);
+      border: 1px solid rgba(148,163,184,.35);
       padding: 10px;
       border-radius: 12px;
       overflow:auto;
       white-space: pre;
       font-size: 12px;
-      color:#d1d5db;
+      color:#334155;
     }
 
     .status{
@@ -152,7 +181,7 @@
     }
 
     .chartCard{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(248,250,255,.95));
       border:1px solid var(--border);
       border-radius: 16px;
       box-shadow: var(--shadow);
@@ -162,7 +191,7 @@
     .chartTitle{
       padding: 10px 10px 0;
       font-weight: 900;
-      color: #e2e8f0;
+      color: #1f2937;
       letter-spacing: .2px;
     }
 
@@ -171,7 +200,7 @@
       padding: 0 10px;
       font-weight: 900;
       font-size: 16px;
-      color: #e2e8f0;
+      color: #1f2937;
     }
 
     .sectionBlock + .sectionBlock{
@@ -188,7 +217,7 @@
 
     .chartTooltip{
       position: fixed;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(255, 255, 255, 0.96);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 10px 12px;
@@ -226,6 +255,163 @@
       line-height:1.4;
     }
 
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(124, 140, 245, 0.25);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .modalOverlay.show{
+      display: flex;
+    }
+
+    .modal{
+      width: min(420px, 90vw);
+      min-height: min(640px, 90vh);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modalHeader{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modalTitle{
+      font-size: 16px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .modalBody{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(241, 245, 255, 0.6);
+      min-height: 150px;
+      color: var(--text);
+    }
+
+    .modalFooter{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modalFooter .controls{
+      margin-left: auto;
+    }
+
+    .ghostButton{
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .stepDots{
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .stepDot{
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(148,163,184,.45);
+    }
+
+    .stepDot.active{
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .modalList{
+      padding-left: 18px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .metricList{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .metricItem{
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .templateBox{
+      position: relative;
+      background: #fff;
+      border: 1px solid rgba(148,163,184,.4);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .templateBox pre{
+      margin: 0;
+      font-size: 12px;
+      color: #334155;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .copyButton{
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 720px){
+      header{
+        padding: 16px;
+      }
+
+      .row{
+        padding: 0 16px;
+      }
+
+      .card{
+        min-width: 100%;
+      }
+
+      .controls{
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button{
+        width: 100%;
+      }
+    }
+
     /* SVG text rendering */
     svg text{ font-family: inherit; }
   </style>
@@ -244,6 +430,11 @@
         <button id="btnSample" type="button">Load sample</button>
       </div>
       <div id="status" class="status">No file loaded.</div>
+      <div class="mono" id="preview">(upload a CSV)</div>
+      <div class="setupNote">
+        <span>Don't have a Health Charts CSV?</span>
+        <button id="openSetup" class="linkButton" type="button">Get one set up here!</button>
+      </div>
     </div>
   </div>
 
@@ -251,6 +442,29 @@
 
   <div class="footerNote">
     Bands are common adult reference categories. Targets can differ by personal risk factors/conditions; use this for visualization, not diagnosis.
+  </div>
+
+  <div id="setupModal" class="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <div class="modal">
+      <div class="modalHeader">
+        <div>
+          <div id="setupTitle" class="modalTitle">Health Charts CSV Setup</div>
+          <div class="sub">Your data stays on your device.</div>
+        </div>
+        <button id="closeSetup" class="ghostButton" type="button">Close</button>
+      </div>
+      <div class="modalBody" id="setupBody">
+        <strong>Everything is processed locally.</strong>
+        <p class="sub">After this page loads, your CSV data never leaves your device.</p>
+      </div>
+      <div class="modalFooter">
+        <button id="backSetup" class="ghostButton" type="button">Back</button>
+        <div class="controls">
+          <button id="nextSetup" type="button">Next</button>
+        </div>
+        <div class="stepDots" id="stepDots"></div>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -346,6 +560,71 @@
   const btnSample = document.getElementById('btnSample');
   const btnClear = document.getElementById('btnClear');
   const tooltip = createTooltip();
+  const setupModal = document.getElementById('setupModal');
+  const setupBody = document.getElementById('setupBody');
+  const btnOpenSetup = document.getElementById('openSetup');
+  const btnCloseSetup = document.getElementById('closeSetup');
+  const btnNextSetup = document.getElementById('nextSetup');
+  const btnBackSetup = document.getElementById('backSetup');
+  const stepDots = document.getElementById('stepDots');
+  let setupStep = 0;
+  const setupState = {
+    selected: new Set(METRICS.map(m => m.key)),
+  };
+  const setupSteps = [
+    {
+      title: 'Welcome!',
+      content: () => `
+        <strong>Everything is processed locally.</strong>
+        <p class="sub">After this page loads, your CSV data never leaves your device. The file you select is read locally in your browser and only used to render charts here. We only count that someone used the website—no CSV contents are transmitted anywhere.</p>
+        <p class="sub">This means your health data stays private and never gets uploaded.</p>
+      `
+    },
+    {
+      title: 'How it works',
+      content: () => `
+        <strong>Create a CSV in four quick steps.</strong>
+        <ol class="modalList">
+          <li>Pick which metrics to include (you can leave blanks for tests you did not record).</li>
+          <li>Copy the CSV template into a spreadsheet.</li>
+          <li>Fill in dates + numbers using Excel, Google Sheets, LibreOffice, or similar.</li>
+          <li>Save/export as <strong>.csv</strong> and load it here to view charts.</li>
+        </ol>
+      `
+    },
+    {
+      title: 'Choose metrics',
+      content: () => `
+        <strong>Choose which metrics to include:</strong>
+        <div class="metricList">
+          ${METRICS.map(metric => `
+            <label class="metricItem">
+              <input type="checkbox" data-metric="${metric.key}" ${setupState.selected.has(metric.key) ? 'checked' : ''} />
+              <span>${metric.title}</span>
+            </label>
+          `).join('')}
+        </div>
+      `
+    },
+    {
+      title: 'Template ready',
+      content: () => `
+        <strong>Your Template is Ready!</strong>
+        <div class="templateBox">
+          <button class="copyButton" id="copyTemplate" type="button">Copy</button>
+          <pre id="templateText"></pre>
+        </div>
+        <p class="sub">Copy the template above, paste it into a spreadsheet, add your results, then save/export as a .csv (comma-separated values) file. Upload that CSV here to see your charts.</p>
+      `
+    },
+    {
+      title: 'Tutorial',
+      content: () => `
+        <strong>Tutorial coming soon.</strong>
+        <p class="sub">(tutorial coming soon)</p>
+      `
+    }
+  ];
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -364,9 +643,37 @@
     handleCsvText(sample, 'sample.csv');
   });
 
+  btnOpenSetup.addEventListener('click', () => {
+    setupStep = 0;
+    updateSetupStep();
+    setupModal.classList.add('show');
+  });
+
+  btnCloseSetup.addEventListener('click', () => {
+    setupModal.classList.remove('show');
+  });
+
+  setupModal.addEventListener('click', (event) => {
+    if (event.target === setupModal){
+      setupModal.classList.remove('show');
+    }
+  });
+
+  btnNextSetup.addEventListener('click', () => {
+    setupStep = Math.min(setupStep + 1, setupSteps.length - 1);
+    updateSetupStep();
+  });
+
+  btnBackSetup.addEventListener('click', () => {
+    setupStep = Math.max(setupStep - 1, 0);
+    updateSetupStep();
+  });
+
   btnClear.addEventListener('click', () => {
     elFile.value = '';
-    elPreview.textContent = '(upload a CSV)';
+    if (elPreview){
+      elPreview.textContent = '(upload a CSV)';
+    }
     elCharts.innerHTML = '';
     setStatus('No file loaded.', false);
   });
@@ -376,13 +683,88 @@
     elStatus.className = 'status' + (isError ? ' error' : '');
   }
 
+  function updateSetupStep(){
+    btnBackSetup.disabled = setupStep === 0;
+    btnNextSetup.textContent = setupStep === setupSteps.length - 1 ? 'Finish' : 'Next';
+
+    const step = setupSteps[setupStep];
+    setupBody.innerHTML = step ? step.content() : '';
+    setupBody.dataset.title = step?.title ?? '';
+    updateStepDots();
+    wireStepInteractions();
+  }
+
+  function updateStepDots(){
+    stepDots.innerHTML = '';
+    setupSteps.forEach((_, idx) => {
+      const dot = document.createElement('span');
+      dot.className = 'stepDot' + (idx === setupStep ? ' active' : '');
+      stepDots.appendChild(dot);
+    });
+  }
+
+  function wireStepInteractions(){
+    setupBody.querySelectorAll('input[type="checkbox"][data-metric]').forEach((input) => {
+      input.addEventListener('change', (event) => {
+        const metric = event.target.dataset.metric;
+        if (!metric) return;
+        if (event.target.checked){
+          setupState.selected.add(metric);
+        } else {
+          setupState.selected.delete(metric);
+        }
+        updateTemplatePreview();
+      });
+    });
+
+    const copyBtn = setupBody.querySelector('#copyTemplate');
+    if (copyBtn){
+      copyBtn.addEventListener('click', async () => {
+        const text = buildTemplateText();
+        try{
+          await navigator.clipboard.writeText(text);
+          copyBtn.textContent = 'Copied';
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy';
+          }, 1500);
+        }catch(err){
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          copyBtn.textContent = 'Copied';
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy';
+          }, 1500);
+        }
+      });
+    }
+    updateTemplatePreview();
+  }
+
+  function buildTemplateText(){
+    const metrics = METRICS.filter(m => setupState.selected.has(m.key));
+    const headers = ['Date', ...metrics.map(m => m.key)];
+    return headers.join(',');
+  }
+
+  function updateTemplatePreview(){
+    const templateEl = setupBody.querySelector('#templateText');
+    if (!templateEl) return;
+    templateEl.textContent = buildTemplateText();
+  }
+
   // -------------------------
   // CSV parsing + normalization
   // -------------------------
   function handleCsvText(text, filename){
     // Show preview (first ~30 lines)
     const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/);
-    elPreview.textContent = lines.slice(0, 30).join('\n');
+    if (elPreview){
+      elPreview.textContent = lines.slice(0, 30).join('\n');
+    }
 
     let rows;
     try{
@@ -619,14 +1001,14 @@
     svg.appendChild(textEl(metric.title, margin.left, 18, {
       size: 15,
       weight: 900,
-      fill: '#e5e7eb'
+      fill: '#1f2937'
     }));
 
     // Y-axis label
     svg.appendChild(textEl(metric.unit, 14, margin.top + plotH/2, {
       size: 12,
       weight: 800,
-      fill: '#94a3b8',
+      fill: '#64748b',
       rotate: -90,
       rotateOrigin: `14 ${margin.top + plotH/2}`
     }));
@@ -646,7 +1028,7 @@
       const lbl = textEl(r.label, margin.left + plotW + 10, yMid + 4, {
         size: 11,
         weight: 800,
-        fill: '#d1d5db'
+        fill: '#475569'
       });
       svg.appendChild(lbl);
     }
@@ -656,27 +1038,27 @@
     for (let i=0; i<=gridCount; i++){
       const v = (yTop / gridCount) * i;
       const yy = y(v);
-      svg.appendChild(line(margin.left, yy, margin.left + plotW, yy, 'rgba(255,255,255,0.10)', 1, '4,4'));
+      svg.appendChild(line(margin.left, yy, margin.left + plotW, yy, 'rgba(15,23,42,0.10)', 1, '4,4'));
       svg.appendChild(textEl(formatTick(v, metric.key), margin.left - 8, yy + 4, {
         size: 11,
         weight: 700,
-        fill: '#cbd5e1',
+        fill: '#475569',
         anchor: 'end'
       }));
     }
 
     // X axis baseline
-    svg.appendChild(line(margin.left, margin.top + plotH, margin.left + plotW, margin.top + plotH, 'rgba(255,255,255,0.20)', 1.2));
+    svg.appendChild(line(margin.left, margin.top + plotH, margin.left + plotW, margin.top + plotH, 'rgba(15,23,42,0.20)', 1.2));
 
     // X ticks (auto)
     const ticks = makeTimeTicks(xMin, xMax, 5);
     for (const t of ticks){
       const xx = margin.left + ((t - xMin) / (xMax - xMin)) * plotW;
-      svg.appendChild(line(xx, margin.top + plotH, xx, margin.top + plotH + 6, 'rgba(255,255,255,0.20)', 1));
+      svg.appendChild(line(xx, margin.top + plotH, xx, margin.top + plotH + 6, 'rgba(15,23,42,0.20)', 1));
       svg.appendChild(textEl(formatDateTick(new Date(t), xMin, xMax), xx, margin.top + plotH + 22, {
         size: 11,
         weight: 700,
-        fill: '#cbd5e1',
+        fill: '#475569',
         anchor: 'middle'
       }));
     }

@@ -1,0 +1,1 @@
+All changes in this repository must keep the site fully local-only: after initial page load, the application must never transmit user-provided health data or CSV contents externally. Do not add analytics, network calls, or third-party scripts that could send or expose health information. All CSV parsing and charting must remain client-side only.
