@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Health Metrics Grapher (CSV Upload)</title>
+  <title>Health Metrics Grapher</title>
   <style>
     :root{
       --bg:#0b0f14;
@@ -233,7 +233,7 @@
 <body>
   <header>
     <h1>Health Metrics Grapher</h1>
-    <p class="sub">Upload a CSV and it will generate trend charts with reference bands (LDL, HDL, Total Cholesterol, Triglycerides, HbA1c).</p>
+    <p class="sub">Upload your template CSV and it will generate trend charts with reference bands (LDL, HDL, Total Cholesterol, Triglycerides, HbA1c).</p>
   </header>
 
   <div class="row">
@@ -242,24 +242,8 @@
       <div class="controls">
         <input id="file" type="file" accept=".csv,text/csv" />
         <button id="btnSample" type="button">Load sample</button>
-        <button id="btnClear" type="button">Clear</button>
-      </div>
-      <div class="hint">
-        Expected header (order doesn’t matter; names must match):
-        <div class="mono" style="margin-top:8px;">Date,LDL,HDL,Total Cholesterol,Triglycerides,HBA1C</div>
-        Notes:
-        <ul style="margin:6px 0 0 18px; padding:0; color:var(--muted);">
-          <li><b>Date</b> should be like <span class="mono">2/4/2025</span> (M/D/YYYY).</li>
-          <li>Numbers can be plain (e.g., <span class="mono">118</span>) and HbA1c may optionally include a <span class="mono">%</span> sign (e.g., <span class="mono">5.1%</span>).</li>
-          <li>Blank cells are treated as missing values.</li>
-        </ul>
       </div>
       <div id="status" class="status">No file loaded.</div>
-    </div>
-
-    <div class="card">
-      <h2>CSV preview</h2>
-      <div id="preview" class="mono" style="min-height: 160px; max-height: 260px;">(upload a CSV)</div>
     </div>
   </div>
 
