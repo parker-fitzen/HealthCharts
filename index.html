@@ -38,7 +38,7 @@
     }
 
     header{
-      padding: 22px 18px 14px;
+      padding: 18px 18px 10px;
       max-width: 1100px;
       margin: 0 auto;
     }
@@ -58,11 +58,11 @@
 
     .row{
       display:flex;
-      gap:14px;
+      gap:12px;
       flex-wrap:wrap;
       align-items:stretch;
       max-width:1100px;
-      margin: 12px auto 24px;
+      margin: 10px auto 18px;
       padding: 0 18px;
     }
 
@@ -71,7 +71,7 @@
       border:1px solid var(--border);
       border-radius: 16px;
       box-shadow: var(--shadow);
-      padding: 14px;
+      padding: 12px;
       flex: 1 1 420px;
       min-width: 320px;
     }
@@ -122,6 +122,40 @@
       line-height: 1.4;
     }
 
+    .setupPrompt{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.55);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .setupPrompt button{
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .setupPrompt .linkButton{
+      background: none;
+      border: none;
+      padding: 0;
+      color: #93c5fd;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .setupPrompt .linkButton:hover{
+      color: #bfdbfe;
+      text-decoration: underline;
+    }
+
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       background: rgba(0,0,0,.28);
@@ -148,7 +182,7 @@
       padding: 0 18px;
       display: grid;
       grid-template-columns: 1fr;
-      gap: 14px;
+      gap: 12px;
     }
 
     .chartCard{
@@ -156,7 +190,7 @@
       border:1px solid var(--border);
       border-radius: 16px;
       box-shadow: var(--shadow);
-      padding: 10px;
+      padding: 8px;
     }
 
     .chartTitle{
@@ -226,6 +260,95 @@
       line-height:1.4;
     }
 
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 18px;
+    }
+
+    .modalOverlay.show{
+      display: flex;
+    }
+
+    .modal{
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      width: min(640px, 100%);
+      padding: 18px;
+    }
+
+    .modalHeader{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .modalTitle{
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .tabs{
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .tabButton{
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .tabButton.active{
+      color: #e2e8f0;
+      background: rgba(148, 163, 184, 0.15);
+      border-color: rgba(148,163,184,.4);
+    }
+
+    .tabPanel{
+      display: none;
+      background: rgba(15, 23, 42, 0.55);
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      padding: 14px;
+      color: var(--muted);
+      min-height: 140px;
+    }
+
+    .tabPanel.active{
+      display: block;
+    }
+
+    .modalActions{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      gap: 10px;
+    }
+
+    .modalActions .rightActions{
+      display: flex;
+      gap: 8px;
+    }
+
     /* SVG text rendering */
     svg text{ font-family: inherit; }
   </style>
@@ -244,6 +367,10 @@
         <button id="btnSample" type="button">Load sample</button>
       </div>
       <div id="status" class="status">No file loaded.</div>
+      <div class="setupPrompt">
+        <span>Don't have a Health Charts CSV?</span>
+        <button id="openSetup" class="linkButton" type="button">Get one set up here!</button>
+      </div>
     </div>
   </div>
 
@@ -251,6 +378,38 @@
 
   <div class="footerNote">
     Bands are common adult reference categories. Targets can differ by personal risk factors/conditions; use this for visualization, not diagnosis.
+  </div>
+
+  <div id="setupModal" class="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+      <div class="modalHeader">
+        <h3 class="modalTitle" id="setupTitle">Health Charts CSV Setup</h3>
+        <button id="closeSetup" type="button">Close</button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tabButton active" type="button" role="tab" data-tab="step-1">Intro</button>
+        <button class="tabButton" type="button" role="tab" data-tab="step-2">Template</button>
+        <button class="tabButton" type="button" role="tab" data-tab="step-3">Next Steps</button>
+      </div>
+      <div class="tabPanel active" id="step-1" role="tabpanel">
+        <strong>Welcome!</strong>
+        <p>This guided setup will help you prepare a Health Charts CSV. For now this is a placeholder dialog.</p>
+      </div>
+      <div class="tabPanel" id="step-2" role="tabpanel">
+        <strong>Template Checklist</strong>
+        <p>We will provide the exact columns and formatting requirements here.</p>
+      </div>
+      <div class="tabPanel" id="step-3" role="tabpanel">
+        <strong>Next Steps</strong>
+        <p>We'll walk you through importing data and validating your results in a later version.</p>
+      </div>
+      <div class="modalActions">
+        <button id="backSetup" type="button">Back</button>
+        <div class="rightActions">
+          <button id="nextSetup" type="button">Next</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -346,6 +505,14 @@
   const btnSample = document.getElementById('btnSample');
   const btnClear = document.getElementById('btnClear');
   const tooltip = createTooltip();
+  const setupModal = document.getElementById('setupModal');
+  const openSetup = document.getElementById('openSetup');
+  const closeSetup = document.getElementById('closeSetup');
+  const nextSetup = document.getElementById('nextSetup');
+  const backSetup = document.getElementById('backSetup');
+  const tabButtons = Array.from(document.querySelectorAll('.tabButton'));
+  const tabPanels = Array.from(document.querySelectorAll('.tabPanel'));
+  let activeTabIndex = 0;
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -371,9 +538,65 @@
     setStatus('No file loaded.', false);
   });
 
+  openSetup.addEventListener('click', () => {
+    openModal();
+  });
+
+  closeSetup.addEventListener('click', () => {
+    closeModal();
+  });
+
+  setupModal.addEventListener('click', (event) => {
+    if (event.target === setupModal){
+      closeModal();
+    }
+  });
+
+  tabButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => setActiveTab(index));
+  });
+
+  nextSetup.addEventListener('click', () => {
+    setActiveTab(Math.min(tabButtons.length - 1, activeTabIndex + 1));
+  });
+
+  backSetup.addEventListener('click', () => {
+    setActiveTab(Math.max(0, activeTabIndex - 1));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && setupModal.classList.contains('show')){
+      closeModal();
+    }
+  });
+
   function setStatus(msg, isError){
     elStatus.textContent = msg;
     elStatus.className = 'status' + (isError ? ' error' : '');
+  }
+
+  function openModal(){
+    setupModal.classList.add('show');
+    setupModal.setAttribute('aria-hidden', 'false');
+    setActiveTab(activeTabIndex);
+  }
+
+  function closeModal(){
+    setupModal.classList.remove('show');
+    setupModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function setActiveTab(index){
+    activeTabIndex = index;
+    tabButtons.forEach((btn, i) => {
+      btn.classList.toggle('active', i === index);
+      btn.setAttribute('aria-selected', i === index ? 'true' : 'false');
+    });
+    tabPanels.forEach((panel, i) => {
+      panel.classList.toggle('active', i === index);
+    });
+    backSetup.disabled = index === 0;
+    nextSetup.disabled = index === tabButtons.length - 1;
   }
 
   // -------------------------
