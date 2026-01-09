@@ -38,7 +38,7 @@
     }
 
     header{
-      padding: 22px 18px 14px;
+      padding: 18px 18px 10px;
       max-width: 1100px;
       margin: 0 auto;
     }
@@ -58,11 +58,11 @@
 
     .row{
       display:flex;
-      gap:14px;
+      gap:12px;
       flex-wrap:wrap;
       align-items:stretch;
       max-width:1100px;
-      margin: 12px auto 24px;
+      margin: 10px auto 20px;
       padding: 0 18px;
     }
 
@@ -71,7 +71,7 @@
       border:1px solid var(--border);
       border-radius: 16px;
       box-shadow: var(--shadow);
-      padding: 14px;
+      padding: 12px 14px;
       flex: 1 1 420px;
       min-width: 320px;
     }
@@ -120,6 +120,33 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.4;
+    }
+
+    .setupNote{
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .linkButton{
+      border: none;
+      background: none;
+      color: #93c5fd;
+      font-weight: 800;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .linkButton:hover{
+      color: #bfdbfe;
     }
 
     .mono{
@@ -226,6 +253,94 @@
       line-height:1.4;
     }
 
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .modalOverlay.show{
+      display: flex;
+    }
+
+    .modal{
+      width: min(640px, 92vw);
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modalHeader{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modalTitle{
+      font-size: 16px;
+      font-weight: 800;
+      color: #e2e8f0;
+    }
+
+    .modalTabs{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tabPill{
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+
+    .tabPill.active{
+      color: #e2e8f0;
+      border-color: rgba(148, 163, 184, 0.5);
+      background: rgba(59, 130, 246, 0.15);
+    }
+
+    .modalBody{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(15, 23, 42, 0.6);
+      min-height: 150px;
+      color: var(--text);
+    }
+
+    .modalFooter{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modalFooter .controls{
+      margin-left: auto;
+    }
+
+    .ghostButton{
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: transparent;
+      color: var(--muted);
+    }
+
     /* SVG text rendering */
     svg text{ font-family: inherit; }
   </style>
@@ -244,6 +359,10 @@
         <button id="btnSample" type="button">Load sample</button>
       </div>
       <div id="status" class="status">No file loaded.</div>
+      <div class="setupNote">
+        <span>Don't have a Health Charts CSV?</span>
+        <button id="openSetup" class="linkButton" type="button">Get one set up here!</button>
+      </div>
     </div>
   </div>
 
@@ -251,6 +370,33 @@
 
   <div class="footerNote">
     Bands are common adult reference categories. Targets can differ by personal risk factors/conditions; use this for visualization, not diagnosis.
+  </div>
+
+  <div id="setupModal" class="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <div class="modal">
+      <div class="modalHeader">
+        <div>
+          <div id="setupTitle" class="modalTitle">Health Charts CSV Setup</div>
+          <div class="sub">Placeholder steps to help you get started.</div>
+        </div>
+        <button id="closeSetup" class="ghostButton" type="button">Close</button>
+      </div>
+      <div class="modalTabs">
+        <span class="tabPill active" data-tab="0">1. Connect</span>
+        <span class="tabPill" data-tab="1">2. Export</span>
+        <span class="tabPill" data-tab="2">3. Verify</span>
+      </div>
+      <div class="modalBody" id="setupBody">
+        <strong>Connect your data source.</strong>
+        <p class="sub">This is a placeholder dialog. We'll add real setup guidance here soon.</p>
+      </div>
+      <div class="modalFooter">
+        <button id="backSetup" class="ghostButton" type="button">Back</button>
+        <div class="controls">
+          <button id="nextSetup" type="button">Next</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -346,6 +492,14 @@
   const btnSample = document.getElementById('btnSample');
   const btnClear = document.getElementById('btnClear');
   const tooltip = createTooltip();
+  const setupModal = document.getElementById('setupModal');
+  const setupBody = document.getElementById('setupBody');
+  const setupTabs = Array.from(document.querySelectorAll('.tabPill'));
+  const btnOpenSetup = document.getElementById('openSetup');
+  const btnCloseSetup = document.getElementById('closeSetup');
+  const btnNextSetup = document.getElementById('nextSetup');
+  const btnBackSetup = document.getElementById('backSetup');
+  let setupStep = 0;
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -364,6 +518,32 @@
     handleCsvText(sample, 'sample.csv');
   });
 
+  btnOpenSetup.addEventListener('click', () => {
+    setupStep = 0;
+    updateSetupStep();
+    setupModal.classList.add('show');
+  });
+
+  btnCloseSetup.addEventListener('click', () => {
+    setupModal.classList.remove('show');
+  });
+
+  setupModal.addEventListener('click', (event) => {
+    if (event.target === setupModal){
+      setupModal.classList.remove('show');
+    }
+  });
+
+  btnNextSetup.addEventListener('click', () => {
+    setupStep = Math.min(setupStep + 1, setupTabs.length - 1);
+    updateSetupStep();
+  });
+
+  btnBackSetup.addEventListener('click', () => {
+    setupStep = Math.max(setupStep - 1, 0);
+    updateSetupStep();
+  });
+
   btnClear.addEventListener('click', () => {
     elFile.value = '';
     elPreview.textContent = '(upload a CSV)';
@@ -374,6 +554,21 @@
   function setStatus(msg, isError){
     elStatus.textContent = msg;
     elStatus.className = 'status' + (isError ? ' error' : '');
+  }
+
+  function updateSetupStep(){
+    setupTabs.forEach((tab, idx) => {
+      tab.classList.toggle('active', idx === setupStep);
+    });
+    btnBackSetup.disabled = setupStep === 0;
+    btnNextSetup.textContent = setupStep === setupTabs.length - 1 ? 'Finish' : 'Next';
+
+    const bodies = [
+      '<strong>Connect your data source.</strong><p class="sub">We will guide users to link their Health Charts provider here.</p>',
+      '<strong>Export a CSV file.</strong><p class="sub">Placeholder content for export instructions and file format tips.</p>',
+      '<strong>Verify the data format.</strong><p class="sub">We will add checks for required columns and date formats.</p>',
+    ];
+    setupBody.innerHTML = bodies[setupStep] ?? bodies[0];
   }
 
   // -------------------------
