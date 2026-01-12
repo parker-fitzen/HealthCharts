@@ -593,6 +593,7 @@
   let setupStep = 0;
   const setupSteps = 5;
   const selectedMetrics = new Set(METRICS.map((m) => m.key));
+  let templateMode = 'download';
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -684,14 +685,28 @@
           `).join('')}
         </div>
       `,
-      `
-        <strong>Your Template is Ready!</strong>
-        <div class="templateBox">
-          <button class="templateCopy" id="copyTemplate" type="button">Copy</button>
-          <textarea class="templateText" id="templateText" readonly></textarea>
-        </div>
-        <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
-      `,
+      templateMode === 'download'
+        ? `
+          <strong>Your Template is Ready!</strong>
+          <div class="controls">
+            <button id="downloadTemplate" type="button">Download CSV</button>
+          </div>
+          <div class="setupNote" style="border-top: none; padding-top: 0; margin-top: 6px;">
+            <button id="showCopyTemplate" class="linkButton" type="button">Copy CSV as text instead</button>
+          </div>
+          <p class="sub">Download the CSV, open it in a spreadsheet, and start entering your measurements.</p>
+        `
+        : `
+          <strong>Your Template is Ready!</strong>
+          <div class="templateBox">
+            <button class="templateCopy" id="copyTemplate" type="button">Copy</button>
+            <textarea class="templateText" id="templateText" readonly></textarea>
+          </div>
+          <div class="setupNote" style="border-top: none; padding-top: 0; margin-top: 6px;">
+            <button id="showDownloadTemplate" class="linkButton" type="button">Download CSV as file instead</button>
+          </div>
+          <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
+        `,
       `
         <strong>Tutorial coming soon</strong>
         <p class="sub">(tutorial coming soon)</p>
@@ -727,6 +742,35 @@
           } else {
             fallbackCopy(text);
           }
+        });
+      }
+      const downloadBtn = setupBody.querySelector('#downloadTemplate');
+      if (downloadBtn){
+        downloadBtn.addEventListener('click', () => {
+          const text = buildTemplateText();
+          const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'health-charts-template.csv';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        });
+      }
+      const showCopy = setupBody.querySelector('#showCopyTemplate');
+      if (showCopy){
+        showCopy.addEventListener('click', () => {
+          templateMode = 'copy';
+          updateSetupStep();
+        });
+      }
+      const showDownload = setupBody.querySelector('#showDownloadTemplate');
+      if (showDownload){
+        showDownload.addEventListener('click', () => {
+          templateMode = 'download';
+          updateSetupStep();
         });
       }
     }
