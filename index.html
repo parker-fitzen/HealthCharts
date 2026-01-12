@@ -593,6 +593,7 @@
   let setupStep = 0;
   const setupSteps = 5;
   const selectedMetrics = new Set(METRICS.map((m) => m.key));
+  let templateMode = 'download';
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -684,14 +685,28 @@
           `).join('')}
         </div>
       `,
-      `
-        <strong>Your Template is Ready!</strong>
-        <div class="templateBox">
-          <button class="templateCopy" id="copyTemplate" type="button">Copy</button>
-          <textarea class="templateText" id="templateText" readonly></textarea>
-        </div>
-        <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
-      `,
+      templateMode === 'download'
+        ? `
+          <strong>Your Template is Ready!</strong>
+          <div class="controls">
+            <button id="downloadTemplate" type="button">Download CSV</button>
+          </div>
+          <div class="setupNote" style="border-top: none; padding-top: 0; margin-top: 6px;">
+            <button id="showCopyTemplate" class="linkButton" type="button">Copy CSV as text instead</button>
+          </div>
+          <p class="sub">Download the CSV, open it in a spreadsheet, and start entering your measurements.</p>
+        `
+        : `
+          <strong>Your Template is Ready!</strong>
+          <div class="templateBox">
+            <button class="templateCopy" id="copyTemplate" type="button">Copy</button>
+            <textarea class="templateText" id="templateText" readonly></textarea>
+          </div>
+          <div class="setupNote" style="border-top: none; padding-top: 0; margin-top: 6px;">
+            <button id="showDownloadTemplate" class="linkButton" type="button">Download CSV as file instead</button>
+          </div>
+          <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
+        `,
       `
         <strong>Tutorial coming soon</strong>
         <p class="sub">(tutorial coming soon)</p>
@@ -723,20 +738,69 @@
         copyBtn.addEventListener('click', () => {
           const text = buildTemplateText();
           if (navigator.clipboard?.writeText){
-            navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+            navigator.clipboard.writeText(text)
+              .then(() => flashCopyFeedback(copyBtn))
+              .catch(() => {
+                fallbackCopy(text);
+                flashCopyFeedback(copyBtn);
+              });
           } else {
             fallbackCopy(text);
+            flashCopyFeedback(copyBtn);
           }
+        });
+      }
+      const downloadBtn = setupBody.querySelector('#downloadTemplate');
+      if (downloadBtn){
+        downloadBtn.addEventListener('click', () => {
+          const text = buildTemplateText();
+          const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'health-charts-template.csv';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        });
+      }
+      const showCopy = setupBody.querySelector('#showCopyTemplate');
+      if (showCopy){
+        showCopy.addEventListener('click', () => {
+          templateMode = 'copy';
+          updateSetupStep();
+        });
+      }
+      const showDownload = setupBody.querySelector('#showDownloadTemplate');
+      if (showDownload){
+        showDownload.addEventListener('click', () => {
+          templateMode = 'download';
+          updateSetupStep();
         });
       }
     }
   }
 
+  function metricHeader(metric){
+    return `${metric.key} (${metric.unit})`;
+  }
+
   function buildTemplateText(){
-    const metrics = METRICS.map((m) => m.key).filter((key) => selectedMetrics.has(key));
-    const header = ['Date', ...metrics].join(',');
+    const metrics = METRICS.filter((metric) => selectedMetrics.has(metric.key));
+    const header = ['Date', ...metrics.map((metric) => metricHeader(metric))].join(',');
     const example = ['MM/DD/YYYY', ...metrics.map(() => '')].join(',');
     return `${header}\n${example}`;
+  }
+
+  function flashCopyFeedback(button){
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.disabled = true;
+    window.setTimeout(() => {
+      button.textContent = originalText;
+      button.disabled = false;
+    }, 1200);
   }
 
   function fallbackCopy(text){
@@ -781,9 +845,25 @@
     // Normalize headers
     const header = rows[0].map(h => (h ?? '').trim().replace(/^\uFEFF/, ''));
     const idx = new Map(header.map((h,i)=>[h,i]));
+    const columnIndex = new Map();
 
-    const required = ['Date', ...METRICS.map(m => m.key)];
-    const missing = required.filter(h => !idx.has(h));
+    columnIndex.set('Date', idx.get('Date'));
+    for (const metric of METRICS){
+      const withUnits = metricHeader(metric);
+      const metricIndex = idx.get(withUnits) ?? idx.get(metric.key);
+      columnIndex.set(metric.key, metricIndex);
+    }
+
+    const required = ['Date', ...METRICS.map((metric) => metricHeader(metric))];
+    const missing = required.filter((headerLabel) => {
+      if (headerLabel === 'Date'){
+        return columnIndex.get('Date') == null;
+      }
+      const metric = METRICS.find((m) => metricHeader(m) === headerLabel);
+      if (!metric) return true;
+      const metricIndex = columnIndex.get(metric.key);
+      return metricIndex == null;
+    });
     if (missing.length){
       setStatus(`Missing required columns: ${missing.join(', ')}`, true);
       elCharts.innerHTML = '';
@@ -793,7 +873,7 @@
     const parsed = [];
     for (let r = 1; r < rows.length; r++){
       const row = rows[r];
-      const dateStr = (row[idx.get('Date')] ?? '').trim();
+      const dateStr = (row[columnIndex.get('Date')] ?? '').trim();
       if (!dateStr) continue; // skip blank rows
 
       const date = parseMDY(dateStr);
@@ -804,7 +884,7 @@
 
       const obj = { Date: date, _rawDate: dateStr };
       for (const m of METRICS){
-        const raw = (row[idx.get(m.key)] ?? '').trim();
+        const raw = (row[columnIndex.get(m.key)] ?? '').trim();
         obj[m.key] = parseNumberMaybePercent(raw);
       }
       parsed.push(obj);
