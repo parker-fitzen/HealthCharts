@@ -409,6 +409,14 @@
       color: #334155;
     }
 
+    .templateToggle{
+      margin-top: 10px;
+    }
+
+    .templateHidden{
+      display: none;
+    }
+
     @media (max-width: 720px){
       header{
         padding: 14px 14px 6px;
@@ -686,11 +694,22 @@
       `,
       `
         <strong>Your Template is Ready!</strong>
-        <div class="templateBox">
-          <button class="templateCopy" id="copyTemplate" type="button">Copy</button>
-          <textarea class="templateText" id="templateText" readonly></textarea>
+        <div id="templateDownloadView">
+          <button id="downloadTemplate" type="button">Download CSV</button>
+          <div class="templateToggle">
+            <button class="linkButton" id="showCopyTemplate" type="button">Copy CSV as text instead</button>
+          </div>
         </div>
-        <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
+        <div id="templateCopyView" class="templateHidden">
+          <div class="templateBox">
+            <button class="templateCopy" id="copyTemplate" type="button">Copy</button>
+            <textarea class="templateText" id="templateText" readonly></textarea>
+          </div>
+          <div class="templateToggle">
+            <button class="linkButton" id="showDownloadTemplate" type="button">Download CSV as file instead</button>
+          </div>
+        </div>
+        <p class="sub">Download the template or copy the text, then paste it into a spreadsheet and save it as a .csv file.</p>
       `,
       `
         <strong>Tutorial coming soon</strong>
@@ -729,6 +748,33 @@
           }
         });
       }
+      const downloadBtn = setupBody.querySelector('#downloadTemplate');
+      if (downloadBtn){
+        downloadBtn.addEventListener('click', () => {
+          downloadTemplateCsv(buildTemplateText());
+        });
+      }
+      const downloadView = setupBody.querySelector('#templateDownloadView');
+      const copyView = setupBody.querySelector('#templateCopyView');
+      const showCopyBtn = setupBody.querySelector('#showCopyTemplate');
+      const showDownloadBtn = setupBody.querySelector('#showDownloadTemplate');
+      const setTemplateView = (mode) => {
+        if (!downloadView || !copyView) return;
+        if (mode === 'copy'){
+          copyView.classList.remove('templateHidden');
+          downloadView.classList.add('templateHidden');
+        } else {
+          downloadView.classList.remove('templateHidden');
+          copyView.classList.add('templateHidden');
+        }
+      };
+      setTemplateView('download');
+      if (showCopyBtn){
+        showCopyBtn.addEventListener('click', () => setTemplateView('copy'));
+      }
+      if (showDownloadBtn){
+        showDownloadBtn.addEventListener('click', () => setTemplateView('download'));
+      }
     }
   }
 
@@ -737,6 +783,18 @@
     const header = ['Date', ...metrics].join(',');
     const example = ['MM/DD/YYYY', ...metrics.map(() => '')].join(',');
     return `${header}\n${example}`;
+  }
+
+  function downloadTemplateCsv(text){
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'health-charts-template.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   function fallbackCopy(text){
