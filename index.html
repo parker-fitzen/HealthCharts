@@ -738,9 +738,15 @@
         copyBtn.addEventListener('click', () => {
           const text = buildTemplateText();
           if (navigator.clipboard?.writeText){
-            navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+            navigator.clipboard.writeText(text)
+              .then(() => flashCopyFeedback(copyBtn))
+              .catch(() => {
+                fallbackCopy(text);
+                flashCopyFeedback(copyBtn);
+              });
           } else {
             fallbackCopy(text);
+            flashCopyFeedback(copyBtn);
           }
         });
       }
@@ -776,11 +782,25 @@
     }
   }
 
+  function metricHeader(metric){
+    return `${metric.key} (${metric.unit})`;
+  }
+
   function buildTemplateText(){
-    const metrics = METRICS.map((m) => m.key).filter((key) => selectedMetrics.has(key));
-    const header = ['Date', ...metrics].join(',');
+    const metrics = METRICS.filter((metric) => selectedMetrics.has(metric.key));
+    const header = ['Date', ...metrics.map((metric) => metricHeader(metric))].join(',');
     const example = ['MM/DD/YYYY', ...metrics.map(() => '')].join(',');
     return `${header}\n${example}`;
+  }
+
+  function flashCopyFeedback(button){
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.disabled = true;
+    window.setTimeout(() => {
+      button.textContent = originalText;
+      button.disabled = false;
+    }, 1200);
   }
 
   function fallbackCopy(text){
@@ -825,9 +845,25 @@
     // Normalize headers
     const header = rows[0].map(h => (h ?? '').trim().replace(/^\uFEFF/, ''));
     const idx = new Map(header.map((h,i)=>[h,i]));
+    const columnIndex = new Map();
 
-    const required = ['Date', ...METRICS.map(m => m.key)];
-    const missing = required.filter(h => !idx.has(h));
+    columnIndex.set('Date', idx.get('Date'));
+    for (const metric of METRICS){
+      const withUnits = metricHeader(metric);
+      const metricIndex = idx.get(withUnits) ?? idx.get(metric.key);
+      columnIndex.set(metric.key, metricIndex);
+    }
+
+    const required = ['Date', ...METRICS.map((metric) => metricHeader(metric))];
+    const missing = required.filter((headerLabel) => {
+      if (headerLabel === 'Date'){
+        return columnIndex.get('Date') == null;
+      }
+      const metric = METRICS.find((m) => metricHeader(m) === headerLabel);
+      if (!metric) return true;
+      const metricIndex = columnIndex.get(metric.key);
+      return metricIndex == null;
+    });
     if (missing.length){
       setStatus(`Missing required columns: ${missing.join(', ')}`, true);
       elCharts.innerHTML = '';
@@ -837,7 +873,7 @@
     const parsed = [];
     for (let r = 1; r < rows.length; r++){
       const row = rows[r];
-      const dateStr = (row[idx.get('Date')] ?? '').trim();
+      const dateStr = (row[columnIndex.get('Date')] ?? '').trim();
       if (!dateStr) continue; // skip blank rows
 
       const date = parseMDY(dateStr);
@@ -848,7 +884,7 @@
 
       const obj = { Date: date, _rawDate: dateStr };
       for (const m of METRICS){
-        const raw = (row[idx.get(m.key)] ?? '').trim();
+        const raw = (row[columnIndex.get(m.key)] ?? '').trim();
         obj[m.key] = parseNumberMaybePercent(raw);
       }
       parsed.push(obj);
