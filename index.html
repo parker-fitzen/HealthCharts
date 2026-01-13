@@ -768,6 +768,7 @@
       key: 'LDL',
       title: 'LDL Cholesterol (lower is better)',
       unit: 'mg/dL',
+      csvHeader: 'LDL (mg/dl)',
       ranges: [
         { start: 0,   end: 100,  color: COLORS.good,    label: 'Optimal (<100)' },
         { start: 100, end: 130,  color: COLORS.caution, label: 'Near optimal (100–129)' },
@@ -780,6 +781,7 @@
       key: 'HDL',
       title: 'HDL Cholesterol (higher is better)',
       unit: 'mg/dL',
+      csvHeader: 'HDL(mg/dl)',
       ranges: [
         { start: 0,  end: 40,  color: COLORS.risk, label: 'Low (≤39)' },
         { start: 40, end: 60,  color: COLORS.good, label: 'Normal (40–59)' },
@@ -790,6 +792,7 @@
       key: 'Total Cholesterol',
       title: 'Total Cholesterol',
       unit: 'mg/dL',
+      csvHeader: 'Total Cholesterol (mg/dl)',
       ranges: [
         { start: 0,   end: 200, color: COLORS.good,    label: 'Desirable (<200)' },
         { start: 200, end: 240, color: COLORS.caution, label: 'Borderline (200–239)' },
@@ -800,6 +803,7 @@
       key: 'Triglycerides',
       title: 'Triglycerides',
       unit: 'mg/dL',
+      csvHeader: 'Triglycerides (mg/dl)',
       ranges: [
         { start: 0,   end: 150, color: COLORS.good,    label: 'Normal (<150)' },
         { start: 150, end: 200, color: COLORS.caution, label: 'Borderline (150–199)' },
@@ -811,6 +815,7 @@
       key: 'HBA1C',
       title: 'HbA1c (blood sugar)',
       unit: '%',
+      csvHeader: 'HBA1C (%)',
       ranges: [
         { start: 0,   end: 5.7, color: COLORS.good,    label: 'Normal (<5.7)' },
         { start: 5.7, end: 6.5, color: COLORS.caution, label: 'Prediabetes (5.7–6.4)' },
@@ -1061,7 +1066,7 @@
   }
 
   function metricHeader(metric){
-    return `${metric.key} (${metric.unit})`;
+    return metric.csvHeader;
   }
 
   function buildTemplateText(){
@@ -1127,23 +1132,19 @@
 
     columnIndex.set('Date', idx.get('Date'));
     for (const metric of METRICS){
-      const withUnits = metricHeader(metric);
-      const metricIndex = idx.get(withUnits) ?? idx.get(metric.key);
+      const metricIndex = idx.get(metricHeader(metric));
       columnIndex.set(metric.key, metricIndex);
     }
 
-    const required = ['Date', ...METRICS.map((metric) => metricHeader(metric))];
-    const missing = required.filter((headerLabel) => {
-      if (headerLabel === 'Date'){
-        return columnIndex.get('Date') == null;
-      }
-      const metric = METRICS.find((m) => metricHeader(m) === headerLabel);
-      if (!metric) return true;
-      const metricIndex = columnIndex.get(metric.key);
-      return metricIndex == null;
-    });
-    if (missing.length){
-      setStatus(`Missing required columns: ${missing.join(', ')}`, true);
+    if (columnIndex.get('Date') == null){
+      setStatus('Missing required column: Date', true);
+      elCharts.innerHTML = '';
+      return;
+    }
+
+    const availableMetrics = METRICS.filter((metric) => columnIndex.get(metric.key) != null);
+    if (availableMetrics.length === 0){
+      setStatus('No recognized metric columns found. Check your headers.', true);
       elCharts.innerHTML = '';
       return;
     }
@@ -1161,7 +1162,7 @@
       }
 
       const obj = { Date: date, _rawDate: dateStr };
-      for (const m of METRICS){
+      for (const m of availableMetrics){
         const raw = (row[columnIndex.get(m.key)] ?? '').trim();
         obj[m.key] = parseNumberMaybePercent(raw);
       }
@@ -1178,7 +1179,7 @@
     parsed.sort((a,b)=>a.Date - b.Date);
 
     setStatus(`Loaded ${filename} — ${parsed.length} row(s).`, false);
-    renderAll(parsed);
+    renderAll(parsed, availableMetrics);
   }
 
   function parseNumberMaybePercent(s){
@@ -1265,12 +1266,17 @@
   // -------------------------
   // Chart rendering (SVG)
   // -------------------------
-  function renderAll(dataRows){
+  function renderAll(dataRows, availableMetrics){
     elCharts.innerHTML = '';
     const container = document.createElement('div');
     container.className = 'chartCard';
+    const availableKeys = new Set(availableMetrics.map((metric) => metric.key));
 
     for (const sec of SECTIONS){
+      const sectionKeys = sec.keys.filter((key) => availableKeys.has(key));
+      if (sectionKeys.length === 0){
+        continue;
+      }
       const section = document.createElement('div');
       section.className = 'sectionBlock';
       section.innerHTML = `
@@ -1278,7 +1284,7 @@
         <div class="note">Colored bands are reference categories. The line is your trend. Values are labeled at each measurement.</div>
       `;
 
-      for (const key of sec.keys){
+      for (const key of sectionKeys){
         const metric = METRICS.find(m => m.key === key);
         const svg = makeChartSvg(dataRows, metric);
         section.appendChild(svg);
