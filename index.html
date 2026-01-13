@@ -409,6 +409,263 @@
       color: #334155;
     }
 
+    .tutorialAnimation{
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,255,0.92));
+      padding: 12px;
+      overflow: hidden;
+      --tutorial-duration: 18.3s;
+      --col-date-x: 30%;
+      --col-ldl-x: 57%;
+      --col-total-x: 91%;
+      --row1-y: 53%;
+      --row2-y: 76%;
+      --start-x: 8%;
+      --start-y: 28%;
+    }
+
+    .tutorialTable{
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.35);
+    }
+
+    .tutorialRow{
+      display: table-row;
+    }
+
+    .tutorialCell{
+      display: table-cell;
+      border-right: 1px solid rgba(148,163,184,0.35);
+      border-bottom: 1px solid rgba(148,163,184,0.35);
+      padding: 8px;
+      height: 38px;
+      font-size: 12px;
+      color: #1f2a44;
+      background: rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+    }
+
+    .tutorialRow:last-child .tutorialCell{
+      border-bottom: none;
+    }
+
+    .tutorialCell:last-child{
+      border-right: none;
+    }
+
+    .tutorialCell.col-date{ width: 37%; }
+    .tutorialCell.col-ldl{ width: 26%; }
+    .tutorialCell.col-total{ width: 37%; }
+
+    .tutorialHeader .tutorialCell{
+      font-weight: 800;
+      background: rgba(99,102,241,0.12);
+      color: #1f2a44;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 11px;
+      height: 38px;
+    }
+
+    .tutorialTyping{
+      display: inline-block;
+      width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .type-date-1{
+      animation: typeDate1 var(--tutorial-duration) linear infinite;
+      animation-timing-function: steps(10, end);
+    }
+    .type-ldl-1{
+      animation: typeLdl1 var(--tutorial-duration) linear infinite;
+      animation-timing-function: steps(3, end);
+    }
+    .type-total-1{
+      animation: typeTotal1 var(--tutorial-duration) linear infinite;
+      animation-timing-function: steps(3, end);
+    }
+    .type-date-2{
+      animation: typeDate2 var(--tutorial-duration) linear infinite;
+      animation-timing-function: steps(10, end);
+    }
+    .type-ldl-2{
+      animation: typeLdl2 var(--tutorial-duration) linear infinite;
+      animation-timing-function: steps(2, end);
+    }
+    .type-total-2{
+      animation: typeTotal2 var(--tutorial-duration) linear infinite;
+      animation-timing-function: steps(3, end);
+    }
+
+    .tutorialCursor{
+      position: absolute;
+      width: 20px;
+      height: 26px;
+      background: #1f2a44;
+      clip-path: polygon(0 0, 0 100%, 38% 72%, 58% 100%, 74% 92%, 52% 66%, 100% 60%);
+      filter: drop-shadow(0 2px 2px rgba(15,23,42,0.3));
+      left: var(--start-x);
+      top: var(--start-y);
+      transform: translate(0, 0);
+      animation: cursorMove var(--tutorial-duration) ease-in-out infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .clickRing{
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(99,102,241,0.75);
+      border-radius: 50%;
+      left: var(--click-x);
+      top: var(--click-y);
+      transform: translate(-50%, -50%) scale(0.2);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .click-date-1{ animation: clickDate1 var(--tutorial-duration) linear infinite; }
+    .click-ldl-1{ animation: clickLdl1 var(--tutorial-duration) linear infinite; }
+    .click-total-1{ animation: clickTotal1 var(--tutorial-duration) linear infinite; }
+    .click-date-2{ animation: clickDate2 var(--tutorial-duration) linear infinite; }
+    .click-ldl-2{ animation: clickLdl2 var(--tutorial-duration) linear infinite; }
+    .click-total-2{ animation: clickTotal2 var(--tutorial-duration) linear infinite; }
+
+    @keyframes cursorMove{
+      0%{
+        left: var(--start-x);
+        top: var(--start-y);
+      }
+      5.46%, 21.86%{
+        left: var(--col-date-x);
+        top: var(--row1-y);
+      }
+      27.32%, 32.24%{
+        left: var(--col-ldl-x);
+        top: var(--row1-y);
+      }
+      37.70%, 42.62%{
+        left: var(--col-total-x);
+        top: var(--row1-y);
+      }
+      48.09%, 64.48%{
+        left: var(--col-date-x);
+        top: var(--row2-y);
+      }
+      69.95%, 73.22%{
+        left: var(--col-ldl-x);
+        top: var(--row2-y);
+      }
+      78.69%, 100%{
+        left: var(--col-total-x);
+        top: var(--row2-y);
+      }
+    }
+
+    @keyframes clickDate1 {
+      0%, 5.46% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+      5.96% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      7.66% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+    }
+
+    @keyframes clickLdl1 {
+      0%, 27.32% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+      27.82% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      29.52% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+    }
+
+    @keyframes clickTotal1 {
+      0%, 37.70% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+      38.20% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      39.90% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+    }
+
+    @keyframes clickDate2 {
+      0%, 48.09% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+      48.59% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      50.29% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+    }
+
+    @keyframes clickLdl2 {
+      0%, 69.95% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+      70.45% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      72.15% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+    }
+
+    @keyframes clickTotal2 {
+      0%, 78.69% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+      79.19% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      80.89% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+    }
+
+    @keyframes typeDate1 {
+      0%, 5.46% { width: 0; }
+      13.66% { width: 10ch; }
+      100% { width: 10ch; }
+    }
+
+    @keyframes typeLdl1 {
+      0%, 27.32% { width: 0; }
+      29.78% { width: 3ch; }
+      100% { width: 3ch; }
+    }
+
+    @keyframes typeTotal1 {
+      0%, 37.70% { width: 0; }
+      40.16% { width: 3ch; }
+      100% { width: 3ch; }
+    }
+
+    @keyframes typeDate2 {
+      0%, 48.09% { width: 0; }
+      56.28% { width: 10ch; }
+      100% { width: 10ch; }
+    }
+
+    @keyframes typeLdl2 {
+      0%, 69.95% { width: 0; }
+      71.58% { width: 2ch; }
+      100% { width: 2ch; }
+    }
+
+    @keyframes typeTotal2 {
+      0%, 78.69% { width: 0; }
+      81.15% { width: 3ch; }
+      100% { width: 3ch; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .tutorialCursor,
+      .clickRing,
+      .tutorialTyping{
+        animation: none;
+      }
+
+      .tutorialTyping{
+        width: auto;
+      }
+    }
+
     @media (max-width: 720px){
       header{
         padding: 14px 14px 6px;
@@ -708,8 +965,34 @@
           <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
         `,
       `
-        <strong>Tutorial coming soon</strong>
-        <p class="sub">(tutorial coming soon)</p>
+        <strong>Watch how to fill out your CSV</strong>
+        <p class="sub">The cursor shows the entry pattern for Date, LDL, and Total Cholesterol rows.</p>
+        <div class="tutorialAnimation" role="img" aria-label="Animated CSV tutorial showing data entry for date, LDL, and total cholesterol.">
+          <div class="tutorialTable">
+            <div class="tutorialRow tutorialHeader">
+              <div class="tutorialCell col-date">Date</div>
+              <div class="tutorialCell col-ldl">LDL</div>
+              <div class="tutorialCell col-total">Total Cholesterol</div>
+            </div>
+            <div class="tutorialRow">
+              <div class="tutorialCell col-date"><span class="tutorialTyping type-date-1">02/04/2025</span></div>
+              <div class="tutorialCell col-ldl"><span class="tutorialTyping type-ldl-1">118</span></div>
+              <div class="tutorialCell col-total"><span class="tutorialTyping type-total-1">206</span></div>
+            </div>
+            <div class="tutorialRow">
+              <div class="tutorialCell col-date"><span class="tutorialTyping type-date-2">01/06/2026</span></div>
+              <div class="tutorialCell col-ldl"><span class="tutorialTyping type-ldl-2">84</span></div>
+              <div class="tutorialCell col-total"><span class="tutorialTyping type-total-2">156</span></div>
+            </div>
+          </div>
+          <div class="tutorialCursor" aria-hidden="true"></div>
+          <span class="clickRing click-date-1" style="--click-x: var(--col-date-x); --click-y: var(--row1-y);"></span>
+          <span class="clickRing click-ldl-1" style="--click-x: var(--col-ldl-x); --click-y: var(--row1-y);"></span>
+          <span class="clickRing click-total-1" style="--click-x: var(--col-total-x); --click-y: var(--row1-y);"></span>
+          <span class="clickRing click-date-2" style="--click-x: var(--col-date-x); --click-y: var(--row2-y);"></span>
+          <span class="clickRing click-ldl-2" style="--click-x: var(--col-ldl-x); --click-y: var(--row2-y);"></span>
+          <span class="clickRing click-total-2" style="--click-x: var(--col-total-x); --click-y: var(--row2-y);"></span>
+        </div>
       `,
     ];
 
