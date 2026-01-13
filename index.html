@@ -361,6 +361,394 @@
       height: 10px;
     }
 
+    .tutorialAnimation{
+      --sheet-width: 280px;
+      --row-height: 34px;
+      --tutorial-duration: 18.3s;
+      --col-width: calc(var(--sheet-width) / 3);
+      --x1-center: calc(var(--col-width) * 0.5);
+      --x2-center: calc(var(--col-width) * 1.5);
+      --x3-center: calc(var(--col-width) * 2.5);
+      --row-1-center: calc(var(--row-height) * 1.5);
+      --row-2-center: calc(var(--row-height) * 2.5);
+      --x1-left: 0px;
+      --x2-left: var(--col-width);
+      --x3-left: calc(var(--col-width) * 2);
+      --row-1-top: var(--row-height);
+      --row-2-top: calc(var(--row-height) * 2);
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .tutorialSheet{
+      position: relative;
+      width: var(--sheet-width);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.8);
+    }
+
+    .tutorialTable{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+      color: #111827;
+    }
+
+    .tutorialTable th,
+    .tutorialTable td{
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      height: var(--row-height);
+      padding: 0 8px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .tutorialTable th{
+      background: rgba(238, 242, 255, 0.9);
+      font-size: 11px;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      color: #4f46e5;
+    }
+
+    .tutorialValue{
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      width: 0;
+      opacity: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 700;
+      color: #0f172a;
+      animation-duration: var(--tutorial-duration);
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+    }
+
+    .tutorialActiveCell{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: var(--col-width);
+      height: var(--row-height);
+      border: 2px solid rgba(99, 102, 241, 0.8);
+      background: rgba(99, 102, 241, 0.08);
+      border-radius: 6px;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+      pointer-events: none;
+      opacity: 0;
+      animation: activeCell var(--tutorial-duration) linear infinite;
+      z-index: 1;
+    }
+
+    .tutorialCursor{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 26px;
+      fill: #111827;
+      filter: drop-shadow(0 2px 2px rgba(15, 23, 42, 0.35));
+      animation: cursorMove var(--tutorial-duration) linear infinite;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .tutorialCursor::after{
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(99, 102, 241, 0.8);
+      top: 6px;
+      left: 6px;
+      opacity: 0;
+      transform: scale(0.5);
+      animation: cursorClick var(--tutorial-duration) linear infinite;
+    }
+
+    .value-date1{
+      --chars: 10;
+      animation-name: typeDate1;
+    }
+
+    .value-ldl1{
+      --chars: 3;
+      animation-name: typeLdl1;
+    }
+
+    .value-total1{
+      --chars: 3;
+      animation-name: typeTotal1;
+    }
+
+    .value-date2{
+      --chars: 10;
+      animation-name: typeDate2;
+    }
+
+    .value-ldl2{
+      --chars: 2;
+      animation-name: typeLdl2;
+    }
+
+    .value-total2{
+      --chars: 3;
+      animation-name: typeTotal2;
+    }
+
+    @keyframes cursorMove{
+      0%{
+        transform: translate(calc(var(--col-width) * -0.4), calc(var(--row-height) * 0.2));
+      }
+      5.46%{
+        transform: translate(calc(var(--x1-center) - 6px), calc(var(--row-1-center) - 12px));
+      }
+      21.86%{
+        transform: translate(calc(var(--x1-center) - 6px), calc(var(--row-1-center) - 12px));
+      }
+      27.32%{
+        transform: translate(calc(var(--x2-center) - 6px), calc(var(--row-1-center) - 12px));
+      }
+      32.24%{
+        transform: translate(calc(var(--x2-center) - 6px), calc(var(--row-1-center) - 12px));
+      }
+      37.70%{
+        transform: translate(calc(var(--x3-center) - 6px), calc(var(--row-1-center) - 12px));
+      }
+      42.62%{
+        transform: translate(calc(var(--x3-center) - 6px), calc(var(--row-1-center) - 12px));
+      }
+      48.09%{
+        transform: translate(calc(var(--x1-center) - 6px), calc(var(--row-2-center) - 12px));
+      }
+      64.48%{
+        transform: translate(calc(var(--x1-center) - 6px), calc(var(--row-2-center) - 12px));
+      }
+      69.95%{
+        transform: translate(calc(var(--x2-center) - 6px), calc(var(--row-2-center) - 12px));
+      }
+      73.22%{
+        transform: translate(calc(var(--x2-center) - 6px), calc(var(--row-2-center) - 12px));
+      }
+      78.69%{
+        transform: translate(calc(var(--x3-center) - 6px), calc(var(--row-2-center) - 12px));
+      }
+      83.61%{
+        transform: translate(calc(var(--x3-center) - 6px), calc(var(--row-2-center) - 12px));
+      }
+      100%{
+        transform: translate(calc(var(--x3-center) - 6px), calc(var(--row-2-center) - 12px));
+      }
+    }
+
+    @keyframes cursorClick{
+      0%,5.2%,27.1%,37.5%,47.8%,69.6%,78.4%,100%{
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      5.46%,27.32%,37.70%,48.09%,69.95%,78.69%{
+        opacity: 0.9;
+        transform: scale(1);
+      }
+      6.2%,28.2%,38.6%,49%,70.8%,79.5%{
+        opacity: 0;
+        transform: scale(1.4);
+      }
+    }
+
+    @keyframes activeCell{
+      0%{
+        opacity: 0;
+        transform: translate(var(--x1-left), var(--row-1-top));
+      }
+      5.46%{
+        opacity: 1;
+        transform: translate(var(--x1-left), var(--row-1-top));
+      }
+      27.32%{
+        transform: translate(var(--x2-left), var(--row-1-top));
+      }
+      37.70%{
+        transform: translate(var(--x3-left), var(--row-1-top));
+      }
+      48.09%{
+        transform: translate(var(--x1-left), var(--row-2-top));
+      }
+      69.95%{
+        transform: translate(var(--x2-left), var(--row-2-top));
+      }
+      78.69%{
+        transform: translate(var(--x3-left), var(--row-2-top));
+      }
+      96%{
+        opacity: 1;
+        transform: translate(var(--x3-left), var(--row-2-top));
+      }
+      100%{
+        opacity: 0;
+        transform: translate(var(--x3-left), var(--row-2-top));
+      }
+    }
+
+    @keyframes typeDate1{
+      0%,5.46%{
+        width: 0;
+        opacity: 0;
+      }
+      5.46%{
+        opacity: 1;
+        animation-timing-function: steps(10, end);
+      }
+      21.86%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      96%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      100%{
+        width: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes typeLdl1{
+      0%,27.32%{
+        width: 0;
+        opacity: 0;
+      }
+      27.32%{
+        opacity: 1;
+        animation-timing-function: steps(3, end);
+      }
+      32.24%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      96%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      100%{
+        width: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes typeTotal1{
+      0%,37.70%{
+        width: 0;
+        opacity: 0;
+      }
+      37.70%{
+        opacity: 1;
+        animation-timing-function: steps(3, end);
+      }
+      42.62%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      96%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      100%{
+        width: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes typeDate2{
+      0%,48.09%{
+        width: 0;
+        opacity: 0;
+      }
+      48.09%{
+        opacity: 1;
+        animation-timing-function: steps(10, end);
+      }
+      64.48%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      96%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      100%{
+        width: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes typeLdl2{
+      0%,69.95%{
+        width: 0;
+        opacity: 0;
+      }
+      69.95%{
+        opacity: 1;
+        animation-timing-function: steps(2, end);
+      }
+      73.22%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      96%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      100%{
+        width: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes typeTotal2{
+      0%,78.69%{
+        width: 0;
+        opacity: 0;
+      }
+      78.69%{
+        opacity: 1;
+        animation-timing-function: steps(3, end);
+      }
+      83.61%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      96%{
+        width: calc(var(--chars) * 1ch);
+        opacity: 1;
+      }
+      100%{
+        width: 0;
+        opacity: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .tutorialValue{
+        width: auto;
+        opacity: 1;
+        animation: none;
+      }
+
+      .tutorialCursor,
+      .tutorialActiveCell{
+        animation: none;
+        opacity: 0;
+      }
+    }
+
     .listSteps{
       margin: 0;
       padding-left: 18px;
@@ -706,10 +1094,40 @@
             <button id="showDownloadTemplate" class="linkButton" type="button">Download CSV as file instead</button>
           </div>
           <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
-        `,
+      `,
       `
-        <strong>Tutorial coming soon</strong>
-        <p class="sub">(tutorial coming soon)</p>
+        <strong>Fill out your CSV template</strong>
+        <p class="sub">Watch the animation to see how two rows of dates, LDL, and Total Cholesterol values are entered.</p>
+        <div class="tutorialAnimation" aria-hidden="true">
+          <div class="tutorialSheet">
+            <table class="tutorialTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>LDL</th>
+                  <th>Total Cholesterol</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tutorialValue value-date1">02/04/2025</span></td>
+                  <td><span class="tutorialValue value-ldl1">118</span></td>
+                  <td><span class="tutorialValue value-total1">206</span></td>
+                </tr>
+                <tr>
+                  <td><span class="tutorialValue value-date2">01/06/2026</span></td>
+                  <td><span class="tutorialValue value-ldl2">84</span></td>
+                  <td><span class="tutorialValue value-total2">156</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="tutorialActiveCell"></div>
+            <svg class="tutorialCursor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 2 L21 12 L13 14 L16 22 L12 23 L9 15 L3 2 Z"></path>
+            </svg>
+          </div>
+        </div>
+        <p class="sub">The cursor loops every few seconds to demonstrate how to keep filling in your CSV.</p>
       `,
     ];
 
