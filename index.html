@@ -20,7 +20,7 @@
       --very:#d8ccf2;
       --blue:#c6ddf5;
       --good-text:#3a7c4a;
-      --caution-text:#b7791f;
+      --caution-text:#d4b726;
       --warn-text:#c05621;
       --risk-text:#9f1239;
       --very-text:#6b46c1;
@@ -466,7 +466,7 @@
       text-transform: uppercase;
       letter-spacing: .08em;
       font-size: 11px;
-      height: 38px;
+      height: 42px;
     }
 
     .tutorialTyping{
@@ -855,9 +855,9 @@
 
   btnSample.addEventListener('click', () => {
     const sample = [
-      'Date,LDL,HDL,Total Cholesterol,Triglycerides,HBA1C',
-      '2/4/2025,118,57,206,157,5.0%',
-      '10/7/2025,113,45,192,168,5.1%',
+      'Date,LDL (mg/dl),HDL(mg/dl),Total Cholesterol (mg/dl),Triglycerides (mg/dl),HBA1C (%)',
+      '2/4/2025,118,57,206,157,5.0',
+      '10/7/2025,113,45,192,168,5.1',
       '1/6/2026,84,42,156,148,',
     ].join('\n');
     handleCsvText(sample, 'sample.csv');
@@ -920,8 +920,9 @@
       `
         <strong>How it works</strong>
         <ol class="listSteps">
-          <li>Choose which metrics you want to track (you can leave any metric blank on a given test).</li>
-          <li>Copy the template, paste it into a spreadsheet, and save it as a CSV.</li>
+          <li>Choose which metrics you want to track.</li>
+          <li>Download the template CSV file or copy it as text and save it as a CSV.</li>
+		  <li>Open the CSV in a spreadsheet program, like Excel or LibreOffice, and fill in your test dates and results. (Results can be left blank in a row if that metric wasn't tested on that date)</li>
           <li>Select that CSV here to visualize your results.</li>
         </ol>
       `,
@@ -945,7 +946,6 @@
           <div class="setupNote" style="border-top: none; padding-top: 0; margin-top: 6px;">
             <button id="showCopyTemplate" class="linkButton" type="button">Copy CSV as text instead</button>
           </div>
-          <p class="sub">Download the CSV, open it in a spreadsheet, and start entering your measurements.</p>
         `
         : `
           <strong>Your Template is Ready!</strong>
@@ -959,14 +959,15 @@
           <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
         `,
       `
-        <strong>Watch how to fill out your CSV</strong>
-        <p class="sub">The cursor shows the entry pattern for Date, LDL, and Total Cholesterol rows.</p>
+        <strong>Time to fill out your CSV</strong>
+        <p class="sub">Simply open the CSV like a spreadsheet and fill it out with your results.</p>
+		<p class="sub">Each row is a new test date, so only include any measurements that were taken on that date.</p>
         <div class="tutorialAnimation" role="img" aria-label="Animated CSV tutorial showing data entry for date, LDL, and total cholesterol.">
           <div class="tutorialTable">
             <div class="tutorialRow tutorialHeader">
               <div class="tutorialCell">Date</div>
-              <div class="tutorialCell">LDL</div>
-              <div class="tutorialCell">Total Cholesterol</div>
+              <div class="tutorialCell">LDL (mg/dl)</div>
+              <div class="tutorialCell">Total Cholesterol (mg/dl)</div>
             </div>
             <div class="tutorialRow">
               <div class="tutorialCell"><span class="tutorialTyping type-date-1">02/04/2025</span></div>
