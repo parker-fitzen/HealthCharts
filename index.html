@@ -417,13 +417,13 @@
       padding: 12px;
       overflow: hidden;
       --tutorial-duration: 18.3s;
-      --col-date-x: 22%;
-      --col-ldl-x: 55%;
-      --col-total-x: 84%;
-      --row1-y: 53%;
-      --row2-y: 76%;
-      --start-x: 8%;
-      --start-y: 28%;
+      --col-date-x: 30%;
+      --col-ldl-x: 62%;
+      --col-total-x: 92%;
+      --row1-y: 56%;
+      --row2-y: 79%;
+      --start-x: 12%;
+      --start-y: 30%;
     }
 
     .tutorialTable{
@@ -466,7 +466,7 @@
       text-transform: uppercase;
       letter-spacing: .08em;
       font-size: 11px;
-      height: 32px;
+      height: 38px;
     }
 
     .tutorialTyping{
@@ -478,12 +478,24 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
-    .type-date-1{ animation: typeDate1 var(--tutorial-duration) linear infinite; }
-    .type-ldl-1{ animation: typeLdl1 var(--tutorial-duration) linear infinite; }
-    .type-total-1{ animation: typeTotal1 var(--tutorial-duration) linear infinite; }
-    .type-date-2{ animation: typeDate2 var(--tutorial-duration) linear infinite; }
-    .type-ldl-2{ animation: typeLdl2 var(--tutorial-duration) linear infinite; }
-    .type-total-2{ animation: typeTotal2 var(--tutorial-duration) linear infinite; }
+    .type-date-1{
+      animation: typeDate1 var(--tutorial-duration) steps(10, end) infinite;
+    }
+    .type-ldl-1{
+      animation: typeLdl1 var(--tutorial-duration) steps(3, end) infinite;
+    }
+    .type-total-1{
+      animation: typeTotal1 var(--tutorial-duration) steps(3, end) infinite;
+    }
+    .type-date-2{
+      animation: typeDate2 var(--tutorial-duration) steps(10, end) infinite;
+    }
+    .type-ldl-2{
+      animation: typeLdl2 var(--tutorial-duration) steps(2, end) infinite;
+    }
+    .type-total-2{
+      animation: typeTotal2 var(--tutorial-duration) steps(3, end) infinite;
+    }
 
     .tutorialCursor{
       position: absolute;
@@ -494,7 +506,7 @@
       filter: drop-shadow(0 2px 2px rgba(15,23,42,0.3));
       left: var(--start-x);
       top: var(--start-y);
-      transform: translate(-50%, -50%);
+      transform: translate(0, 0);
       animation: cursorMove var(--tutorial-duration) ease-in-out infinite;
       z-index: 2;
       pointer-events: none;
@@ -596,63 +608,32 @@
 
     @keyframes typeDate1 {
       0%, 5.46% { width: 0; }
-      7.10% { width: 1ch; }
-      8.74% { width: 2ch; }
-      10.38% { width: 3ch; }
-      12.02% { width: 4ch; }
-      13.66% { width: 5ch; }
-      15.30% { width: 6ch; }
-      16.94% { width: 7ch; }
-      18.58% { width: 8ch; }
-      20.22% { width: 9ch; }
-      21.86% { width: 10ch; }
-      100% { width: 10ch; }
+      21.86%, 100% { width: 10ch; }
     }
 
     @keyframes typeLdl1 {
       0%, 27.32% { width: 0; }
-      28.96% { width: 1ch; }
-      30.60% { width: 2ch; }
-      32.24% { width: 3ch; }
-      100% { width: 3ch; }
+      32.24%, 100% { width: 3ch; }
     }
 
     @keyframes typeTotal1 {
       0%, 37.70% { width: 0; }
-      39.34% { width: 1ch; }
-      40.98% { width: 2ch; }
-      42.62% { width: 3ch; }
-      100% { width: 3ch; }
+      42.62%, 100% { width: 3ch; }
     }
 
     @keyframes typeDate2 {
       0%, 48.09% { width: 0; }
-      49.73% { width: 1ch; }
-      51.37% { width: 2ch; }
-      53.01% { width: 3ch; }
-      54.64% { width: 4ch; }
-      56.28% { width: 5ch; }
-      57.92% { width: 6ch; }
-      59.56% { width: 7ch; }
-      61.20% { width: 8ch; }
-      62.84% { width: 9ch; }
-      64.48% { width: 10ch; }
-      100% { width: 10ch; }
+      64.48%, 100% { width: 10ch; }
     }
 
     @keyframes typeLdl2 {
       0%, 69.95% { width: 0; }
-      71.58% { width: 1ch; }
-      73.22% { width: 2ch; }
-      100% { width: 2ch; }
+      73.22%, 100% { width: 2ch; }
     }
 
     @keyframes typeTotal2 {
       0%, 78.69% { width: 0; }
-      80.33% { width: 1ch; }
-      81.97% { width: 2ch; }
-      83.61% { width: 3ch; }
-      100% { width: 3ch; }
+      83.61%, 100% { width: 3ch; }
     }
 
     @media (prefers-reduced-motion: reduce){
