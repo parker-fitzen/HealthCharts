@@ -409,6 +409,319 @@
       color: #334155;
     }
 
+    .tutorialAnimation{
+      --table-x: 12px;
+      --table-y: 12px;
+      --col-date: 150px;
+      --col-ldl: 110px;
+      --col-total: 180px;
+      --row-h: 34px;
+      --cursor-start-x: calc(var(--table-x) - 26px);
+      --cursor-start-y: calc(var(--table-y) + var(--row-h) + 10px);
+      --cursor-date-x: calc(var(--table-x) + 18px);
+      --cursor-ldl-x: calc(var(--table-x) + var(--col-date) + 18px);
+      --cursor-total-x: calc(var(--table-x) + var(--col-date) + var(--col-ldl) + 18px);
+      --cursor-row1-y: calc(var(--table-y) + var(--row-h) + 10px);
+      --cursor-row2-y: calc(var(--table-y) + (var(--row-h) * 2) + 10px);
+      position: relative;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .tutorialTable{
+      display: grid;
+      grid-template-columns: var(--col-date) var(--col-ldl) var(--col-total);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .tutorialHeader,
+    .tutorialCell{
+      min-height: var(--row-h);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      border-right: 1px solid rgba(148, 163, 184, 0.5);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.5);
+      color: #334155;
+    }
+
+    .tutorialHeader{
+      background: #eef2ff;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
+    .tutorialCell{
+      background: #ffffff;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .tutorialTable > :nth-child(3n){
+      border-right: none;
+    }
+
+    .tutorialTable > :nth-last-child(-n + 3){
+      border-bottom: none;
+    }
+
+    .tutorialCell.highlight{
+      animation: cellFocus 18.3s infinite;
+    }
+
+    .tutorialCell.highlight.ldl{
+      animation-name: cellFocusLdl;
+    }
+
+    .tutorialCell.highlight.total{
+      animation-name: cellFocusTotal;
+    }
+
+    .tutorialCell.highlight.row2{
+      animation-name: cellFocusRow2;
+    }
+
+    .tutorialCell.highlight.row2.ldl{
+      animation-name: cellFocusRow2Ldl;
+    }
+
+    .tutorialCell.highlight.row2.total{
+      animation-name: cellFocusRow2Total;
+    }
+
+    .typed{
+      display: inline-block;
+      width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      animation-duration: 18.3s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+    }
+
+    .typed.date1{
+      --chars: 10;
+      animation-name: typeDate1;
+      animation-timing-function: steps(10);
+    }
+
+    .typed.ldl1{
+      --chars: 3;
+      animation-name: typeLdl1;
+      animation-timing-function: steps(3);
+    }
+
+    .typed.total1{
+      --chars: 3;
+      animation-name: typeTotal1;
+      animation-timing-function: steps(3);
+    }
+
+    .typed.date2{
+      --chars: 10;
+      animation-name: typeDate2;
+      animation-timing-function: steps(10);
+    }
+
+    .typed.ldl2{
+      --chars: 2;
+      animation-name: typeLdl2;
+      animation-timing-function: steps(2);
+    }
+
+    .typed.total2{
+      --chars: 3;
+      animation-name: typeTotal2;
+      animation-timing-function: steps(3);
+    }
+
+    .tutorialCursor{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 26px;
+      z-index: 3;
+      animation: cursorMove 18.3s infinite;
+    }
+
+    .tutorialCursor::before{
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 24px;
+      background: #1f2937;
+      clip-path: polygon(0 0, 100% 40%, 62% 45%, 86% 100%, 62% 100%, 46% 54%, 0 70%);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.8) inset;
+    }
+
+    .cursorClick{
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(99, 102, 241, 0.9);
+      top: 10px;
+      left: 10px;
+      opacity: 0;
+      animation: clickPulse 18.3s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes cursorMove{
+      0%{
+        transform: translate(var(--cursor-start-x), var(--cursor-start-y));
+      }
+      5.46%{
+        transform: translate(var(--cursor-date-x), var(--cursor-row1-y));
+      }
+      21.86%{
+        transform: translate(var(--cursor-date-x), var(--cursor-row1-y));
+      }
+      27.32%{
+        transform: translate(var(--cursor-ldl-x), var(--cursor-row1-y));
+      }
+      32.24%{
+        transform: translate(var(--cursor-ldl-x), var(--cursor-row1-y));
+      }
+      37.7%{
+        transform: translate(var(--cursor-total-x), var(--cursor-row1-y));
+      }
+      42.62%{
+        transform: translate(var(--cursor-total-x), var(--cursor-row1-y));
+      }
+      48.09%{
+        transform: translate(var(--cursor-date-x), var(--cursor-row2-y));
+      }
+      64.48%{
+        transform: translate(var(--cursor-date-x), var(--cursor-row2-y));
+      }
+      69.95%{
+        transform: translate(var(--cursor-ldl-x), var(--cursor-row2-y));
+      }
+      73.22%{
+        transform: translate(var(--cursor-ldl-x), var(--cursor-row2-y));
+      }
+      78.69%{
+        transform: translate(var(--cursor-total-x), var(--cursor-row2-y));
+      }
+      83.61%{
+        transform: translate(var(--cursor-total-x), var(--cursor-row2-y));
+      }
+      100%{
+        transform: translate(var(--cursor-total-x), var(--cursor-row2-y));
+      }
+    }
+
+    @keyframes clickPulse{
+      0%, 5.2%{ opacity: 0; transform: scale(0.4); }
+      6.2%{ opacity: 0.95; transform: scale(1); }
+      7.1%{ opacity: 0; transform: scale(1.25); }
+      26.6%{ opacity: 0; transform: scale(0.4); }
+      27.8%{ opacity: 0.95; transform: scale(1); }
+      28.7%{ opacity: 0; transform: scale(1.25); }
+      37.1%{ opacity: 0; transform: scale(0.4); }
+      38.3%{ opacity: 0.95; transform: scale(1); }
+      39.1%{ opacity: 0; transform: scale(1.25); }
+      47.4%{ opacity: 0; transform: scale(0.4); }
+      48.6%{ opacity: 0.95; transform: scale(1); }
+      49.4%{ opacity: 0; transform: scale(1.25); }
+      69.2%{ opacity: 0; transform: scale(0.4); }
+      70.3%{ opacity: 0.95; transform: scale(1); }
+      71.2%{ opacity: 0; transform: scale(1.25); }
+      77.9%{ opacity: 0; transform: scale(0.4); }
+      79.1%{ opacity: 0.95; transform: scale(1); }
+      80%{ opacity: 0; transform: scale(1.25); }
+      100%{ opacity: 0; transform: scale(0.4); }
+    }
+
+    @keyframes cellFocus{
+      0%, 5.2%{ box-shadow: none; }
+      6.2%{ box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); }
+      7.4%{ box-shadow: none; }
+      100%{ box-shadow: none; }
+    }
+
+    @keyframes cellFocusLdl{
+      0%, 26.6%{ box-shadow: none; }
+      27.8%{ box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); }
+      29%{ box-shadow: none; }
+      100%{ box-shadow: none; }
+    }
+
+    @keyframes cellFocusTotal{
+      0%, 37.1%{ box-shadow: none; }
+      38.3%{ box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); }
+      39.5%{ box-shadow: none; }
+      100%{ box-shadow: none; }
+    }
+
+    @keyframes cellFocusRow2{
+      0%, 47.4%{ box-shadow: none; }
+      48.6%{ box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); }
+      49.8%{ box-shadow: none; }
+      100%{ box-shadow: none; }
+    }
+
+    @keyframes cellFocusRow2Ldl{
+      0%, 69.2%{ box-shadow: none; }
+      70.3%{ box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); }
+      71.5%{ box-shadow: none; }
+      100%{ box-shadow: none; }
+    }
+
+    @keyframes cellFocusRow2Total{
+      0%, 77.9%{ box-shadow: none; }
+      79.1%{ box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); }
+      80.3%{ box-shadow: none; }
+      100%{ box-shadow: none; }
+    }
+
+    @keyframes typeDate1{
+      0%, 5.46%{ width: 0; }
+      21.86%{ width: 10ch; }
+      100%{ width: 10ch; }
+    }
+
+    @keyframes typeLdl1{
+      0%, 27.32%{ width: 0; }
+      32.24%{ width: 3ch; }
+      100%{ width: 3ch; }
+    }
+
+    @keyframes typeTotal1{
+      0%, 37.7%{ width: 0; }
+      42.62%{ width: 3ch; }
+      100%{ width: 3ch; }
+    }
+
+    @keyframes typeDate2{
+      0%, 48.09%{ width: 0; }
+      64.48%{ width: 10ch; }
+      100%{ width: 10ch; }
+    }
+
+    @keyframes typeLdl2{
+      0%, 69.95%{ width: 0; }
+      73.22%{ width: 2ch; }
+      100%{ width: 2ch; }
+    }
+
+    @keyframes typeTotal2{
+      0%, 78.69%{ width: 0; }
+      83.61%{ width: 3ch; }
+      100%{ width: 3ch; }
+    }
+
     @media (max-width: 720px){
       header{
         padding: 14px 14px 6px;
@@ -706,10 +1019,37 @@
             <button id="showDownloadTemplate" class="linkButton" type="button">Download CSV as file instead</button>
           </div>
           <p class="sub">Copy this text, paste it into a spreadsheet, then save it as a .csv (comma separated values) file.</p>
-        `,
+      `,
       `
-        <strong>Tutorial coming soon</strong>
-        <p class="sub">(tutorial coming soon)</p>
+        <strong>Tutorial: Filling out your template</strong>
+        <div class="tutorialAnimation" role="img" aria-label="Animated walkthrough of entering dates, LDL, and Total Cholesterol values into a CSV template.">
+          <div class="tutorialTable">
+            <div class="tutorialHeader">Date</div>
+            <div class="tutorialHeader">LDL (mg/dL)</div>
+            <div class="tutorialHeader">Total Cholesterol (mg/dL)</div>
+            <div class="tutorialCell highlight">
+              <span class="typed date1">02/04/2025</span>
+            </div>
+            <div class="tutorialCell highlight ldl">
+              <span class="typed ldl1">118</span>
+            </div>
+            <div class="tutorialCell highlight total">
+              <span class="typed total1">206</span>
+            </div>
+            <div class="tutorialCell highlight row2">
+              <span class="typed date2">01/06/2026</span>
+            </div>
+            <div class="tutorialCell highlight row2 ldl">
+              <span class="typed ldl2">84</span>
+            </div>
+            <div class="tutorialCell highlight row2 total">
+              <span class="typed total2">156</span>
+            </div>
+          </div>
+          <div class="tutorialCursor" aria-hidden="true">
+            <span class="cursorClick"></span>
+          </div>
+        </div>
       `,
     ];
 
