@@ -418,7 +418,7 @@
       overflow: hidden;
       --tutorial-duration: 18.3s;
       --col-date-x: 30%;
-      --col-ldl-x: 63%;
+      --col-ldl-x: 58%;
       --col-total-x: 91%;
       --row1-y: 53%;
       --row2-y: 76%;
@@ -428,22 +428,22 @@
 
     .tutorialTable{
       display: grid;
-      gap: 0;
+      grid-template-columns: 1.1fr 0.8fr 1.1fr;
+      grid-auto-rows: 38px;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid rgba(148,163,184,0.35);
     }
 
     .tutorialRow{
-      display: grid;
-      grid-template-columns: 1.1fr 0.8fr 1.1fr;
+      display: contents;
     }
 
     .tutorialCell{
       border-right: 1px solid rgba(148,163,184,0.35);
       border-bottom: 1px solid rgba(148,163,184,0.35);
       padding: 8px;
-      height: 38px;
+      height: 100%;
       font-size: 12px;
       color: #1f2a44;
       background: rgba(255,255,255,0.9);
@@ -451,12 +451,12 @@
       align-items: center;
     }
 
-    .tutorialRow:last-child .tutorialCell{
-      border-bottom: none;
+    .tutorialCell:nth-child(3n){
+      border-right: none;
     }
 
-    .tutorialCell:last-child{
-      border-right: none;
+    .tutorialCell:nth-last-child(-n+3){
+      border-bottom: none;
     }
 
     .tutorialHeader .tutorialCell{
@@ -466,7 +466,6 @@
       text-transform: uppercase;
       letter-spacing: .08em;
       font-size: 11px;
-      height: 38px;
     }
 
     .tutorialTyping{
@@ -614,37 +613,37 @@
 
     @keyframes typeDate1 {
       0%, 5.46% { width: 0; }
-      21.86% { width: 10ch; }
+      13.66% { width: 10ch; }
       100% { width: 10ch; }
     }
 
     @keyframes typeLdl1 {
       0%, 27.32% { width: 0; }
-      32.24% { width: 3ch; }
+      29.78% { width: 3ch; }
       100% { width: 3ch; }
     }
 
     @keyframes typeTotal1 {
       0%, 37.70% { width: 0; }
-      42.62% { width: 3ch; }
+      40.16% { width: 3ch; }
       100% { width: 3ch; }
     }
 
     @keyframes typeDate2 {
       0%, 48.09% { width: 0; }
-      64.48% { width: 10ch; }
+      56.28% { width: 10ch; }
       100% { width: 10ch; }
     }
 
     @keyframes typeLdl2 {
       0%, 69.95% { width: 0; }
-      73.22% { width: 2ch; }
+      71.58% { width: 2ch; }
       100% { width: 2ch; }
     }
 
     @keyframes typeTotal2 {
       0%, 78.69% { width: 0; }
-      83.61% { width: 3ch; }
+      81.15% { width: 3ch; }
       100% { width: 3ch; }
     }
 
