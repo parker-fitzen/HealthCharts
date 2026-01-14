@@ -770,17 +770,31 @@
       title: 'LDL Cholesterol (lower is better)',
       unit: 'mg/dL',
       ranges: [
-        { start: 0,   end: 100,  color: COLORS.good,    label: 'Optimal (<100)' },
-        { start: 100, end: 130,  color: COLORS.caution, label: 'Near optimal (100–129)' },
+        { start: 0,   end: 70,  color: COLORS.blue,    label: 'Optimal (<70)' },
+		{ start: 70,   end: 100,  color: COLORS.good,    label: 'Healthy (<100)' },
+        { start: 100, end: 130,  color: COLORS.caution, label: 'Elevated (100–129)' },
         { start: 130, end: 160,  color: COLORS.warn,    label: 'Borderline high (130–159)' },
         { start: 160, end: 190,  color: COLORS.risk,    label: 'High (160–189)' },
         { start: 190, end: Infinity, color: COLORS.very, label: 'Very high (≥190)' },
       ]
     },
+	{
+      key: 'Apo B',
+      csvHeader: 'ApoB (mg/dl)',
+      title: 'Apolipoprotein B (ApoB)',
+      unit: 'mg/dL',
+      ranges: [
+		{ start: 0,   end: 90,  color: COLORS.good,    label: 'Healthy (<90)' },
+        { start: 90, end: 100,  color: COLORS.caution, label: 'Elevated (90-99)' },
+        { start: 100, end: 120,  color: COLORS.warn,    label: 'Borderline high (100–119)' },
+        { start: 120, end: 140,  color: COLORS.risk,    label: 'High (120–139)' },
+        { start: 140, end: Infinity, color: COLORS.very, label: 'Very high (≥140)' },
+      ]
+    },
     {
       key: 'HDL',
       csvHeader: 'HDL(mg/dl)',
-      title: 'HDL Cholesterol (higher is better)',
+      title: 'HDL Cholesterol',
       unit: 'mg/dL',
       ranges: [
         { start: 0,  end: 40,  color: COLORS.risk, label: 'Low (≤39)' },
@@ -794,7 +808,7 @@
       title: 'Total Cholesterol',
       unit: 'mg/dL',
       ranges: [
-        { start: 0,   end: 200, color: COLORS.good,    label: 'Desirable (<200)' },
+        { start: 0,   end: 200, color: COLORS.good,    label: 'Optimal (<200)' },
         { start: 200, end: 240, color: COLORS.caution, label: 'Borderline (200–239)' },
         { start: 240, end: Infinity, color: COLORS.risk, label: 'High (≥240)' },
       ]
@@ -818,15 +832,15 @@
       unit: '%',
       ranges: [
         { start: 0,   end: 5.7, color: COLORS.good,    label: 'Normal (<5.7)' },
-        { start: 5.7, end: 6.5, color: COLORS.caution, label: 'Prediabetes (5.7–6.4)' },
-        { start: 6.5, end: Infinity, color: COLORS.risk, label: 'Diabetes (≥6.5)' },
+        { start: 5.7, end: 6.4, color: COLORS.caution, label: 'Prediabetes (5.7–6.4)' },
+        { start: 6.4, end: Infinity, color: COLORS.risk, label: 'Diabetes (≥6.4)' },
       ]
     },
   ];
 
   const SECTIONS = [
-    { title: 'Cholesterol Trends', keys: ['LDL','HDL','Total Cholesterol'] },
-    { title: 'Metabolic Health Trends', keys: ['Triglycerides','HBA1C'] },
+    { title: 'Cardiometabolic Trends', keys: ['LDL','Apo B','HDL','Total Cholesterol','Triglycerides','HBA1C'] },
+    { title: 'Hormonal Health Trends', keys: [] },
   ];
 
   // -------------------------
