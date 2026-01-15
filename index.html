@@ -145,9 +145,7 @@
       text-decoration: underline;
     }
 
-    .linkButton:hover{
-      color: #4338ca;
-    }
+    .linkButton:hover{ color: #4338ca; }
 
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -264,13 +262,14 @@
       padding: 20px;
     }
 
-    .modalOverlay.show{
-      display: flex;
-    }
+    .modalOverlay.show{ display: flex; }
 
     .modal{
       width: min(360px, 92vw);
+      height: 520px;
       min-height: 520px;
+      max-height: 520px;
+      overflow: hidden;
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 22px;
@@ -295,15 +294,28 @@
     }
 
     .modalBody{
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-      background: rgba(243, 244, 255, 0.7);
-      min-height: 250px;
-      color: var(--text);
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       gap: 10px;
+    }
+
+    .setupSticky{
+      flex: 0 0 auto;
+      padding: 2px 0 6px 0;
+      background: transparent;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Step 2 metric list scroll area */
+    #metricCategoryList{
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+      padding-right: 6px;
     }
 
     .modalFooter{
@@ -313,9 +325,7 @@
       margin-top: auto;
     }
 
-    .modalFooter .controls{
-      justify-content: space-between;
-    }
+    .modalFooter .controls{ justify-content: space-between; }
 
     .ghostButton{
       border: 1px solid rgba(148, 163, 184, 0.5);
@@ -338,9 +348,7 @@
       padding: 0;
     }
 
-    .closeButton:hover{
-      background: rgba(254, 202, 202, 0.9);
-    }
+    .closeButton:hover{ background: rgba(254, 202, 202, 0.9); }
 
     .dotTabs{
       display: flex;
@@ -368,19 +376,113 @@
       line-height: 1.5;
     }
 
-    .metricList{
-      display: grid;
-      gap: 8px;
-      margin: 0;
+    /* Metric picker (mobile-centric chips) */
+    .metricCat{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,.95);
     }
 
-    .metricItem{
+    .metricCatHeader{
+      width: 100%;
+      appearance: none;
+      border: none;
+      background: transparent;
+      cursor: pointer;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
+      padding: 10px 12px;
+      font-weight: 900;
       color: var(--text);
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
     }
+
+    .metricCatHeader:active{ transform: scale(0.998); }
+
+    .metricCatHeader:focus{
+      outline: none;
+    }
+
+    .metricCatTitle{
+      font-size: 13px;
+      letter-spacing: .2px;
+    }
+
+    .metricCatChevron{
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid rgba(31,42,68,.14);
+      background: rgba(31,42,68,.04);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: rgba(31,42,68,.75);
+      transform: rotate(0deg);
+      transition: transform 140ms ease;
+      flex: 0 0 auto;
+    }
+
+    .metricCatHeader.expanded .metricCatChevron{ transform: rotate(180deg); }
+
+    .metricChipList{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 12px 14px;
+    }
+
+    .metricChip{
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(31,42,68,.10);
+      background: rgba(31,42,68,.06);
+      color: rgba(31,42,68,.78);
+      font-size: 12.5px;
+      font-weight: 900;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 140ms ease, border-color 140ms ease, transform 80ms ease, color 140ms ease;
+      max-width: 100%;
+    }
+
+    .metricChip:active{ transform: scale(0.992); }
+
+    .metricChip:focus-within{
+      outline: none;
+    }
+
+    .metricCb{
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .metricChipText{
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      padding-left: 2px;
+    }
+
+    .metricChip.selected{
+      background: var(--blue-text);
+      border-color: rgba(29,78,216,.65);
+      color: #ffffff;
+    }
+
+    .metricChip.selected .metricChipText{ color: #ffffff; }
 
     .templateBox{
       position: relative;
@@ -397,7 +499,6 @@
       padding: 6px 10px;
       font-size: 12px;
     }
-
     .templateText{
       width: 100%;
       min-height: 120px;
@@ -429,9 +530,12 @@
     .tutorialTable{
       display: grid;
       gap: 0;
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
       border: 1px solid rgba(148,163,184,0.35);
+      background: rgba(255,255,255,0.9);
+      /* Visually remove the outer padding “buffer” while preserving the original coordinate space. */
+      box-shadow: 0 0 0 12px rgba(255,255,255,0.9);
       grid-template-columns: 1.1fr 0.8fr 1.1fr;
     }
 
@@ -661,35 +765,14 @@
     }
 
     @media (max-width: 720px){
-      header{
-        padding: 14px 14px 6px;
-      }
-
-      h1{
-        font-size: 20px;
-      }
-
-      .row,
-      .charts,
-      .footerNote{
-        padding: 0 14px;
-      }
-
-      .card{
-        min-width: 100%;
-      }
-
-      .controls{
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      button{
-        width: 100%;
-      }
+      header{ padding: 14px 14px 6px; }
+      h1{ font-size: 20px; }
+      .row, .charts, .footerNote{ padding: 0 14px; }
+      .card{ min-width: 100%; }
+      .controls{ flex-direction: column; align-items: stretch; }
+      button{ width: 100%; }
     }
 
-    /* SVG text rendering */
     svg text{ font-family: inherit; }
   </style>
 </head>
@@ -763,84 +846,138 @@
     blue: getCss('--blue-text'),
   };
 
-  const METRICS = [
-    {
-      key: 'LDL',
-      csvHeader: 'LDL (mg/dl)',
-      title: 'LDL Cholesterol (lower is better)',
-      unit: 'mg/dL',
-      ranges: [
-        { start: 0,   end: 70,  color: COLORS.blue,    label: 'Optimal (<70)' },
-		{ start: 70,   end: 100,  color: COLORS.good,    label: 'Healthy (<100)' },
-        { start: 100, end: 130,  color: COLORS.caution, label: 'Elevated (100–129)' },
-        { start: 130, end: 160,  color: COLORS.warn,    label: 'Borderline high (130–159)' },
-        { start: 160, end: 190,  color: COLORS.risk,    label: 'High (160–189)' },
-        { start: 190, end: Infinity, color: COLORS.very, label: 'Very high (≥190)' },
-      ]
-    },
-	{
-      key: 'Apo B',
-      csvHeader: 'ApoB (mg/dl)',
-      title: 'Apolipoprotein B (ApoB)',
-      unit: 'mg/dL',
-      ranges: [
-		{ start: 0,   end: 90,  color: COLORS.good,    label: 'Healthy (<90)' },
-        { start: 90, end: 100,  color: COLORS.caution, label: 'Elevated (90-99)' },
-        { start: 100, end: 120,  color: COLORS.warn,    label: 'Borderline high (100–119)' },
-        { start: 120, end: 140,  color: COLORS.risk,    label: 'High (120–139)' },
-        { start: 140, end: Infinity, color: COLORS.very, label: 'Very high (≥140)' },
-      ]
-    },
-    {
-      key: 'HDL',
-      csvHeader: 'HDL(mg/dl)',
-      title: 'HDL Cholesterol',
-      unit: 'mg/dL',
-      ranges: [
-        { start: 0,  end: 40,  color: COLORS.risk, label: 'Low (≤39)' },
+  let CURRENT_SEX = (localStorage.getItem('chartSex') || 'male');
+
+const METRICS = [
+    // ---------------- Cardiometabolic ----------------
+    { key: 'LDL', csvHeader: 'LDL (mg/dl)', title: 'LDL Cholesterol', unit: 'mg/dL', category: 'Cardiometabolic', ranges: [
+      { start: 0,   end: 70,  color: COLORS.blue,    label: 'Optimal (<70)' },
+      { start: 70,  end: 100, color: COLORS.good,    label: 'Healthy (<100)' },
+      { start: 100, end: 130, color: COLORS.caution, label: 'Elevated (100–129)' },
+      { start: 130, end: 160, color: COLORS.warn,    label: 'Borderline high (130–159)' },
+      { start: 160, end: 190, color: COLORS.risk,    label: 'High (160–189)' },
+      { start: 190, end: Infinity, color: COLORS.very, label: 'Very high (≥190)' },
+    ]},
+    { key: 'Apo B', csvHeader: 'ApoB (mg/dl)', aliases: ['Apo B (mg/dl)','ApoB (mg/dL)','Apo B (mg/dL)'], title: 'Apolipoprotein B', unit: 'mg/dL', category: 'Cardiometabolic', ranges: [
+      { start: 0,   end: 90,  color: COLORS.good,    label: 'Healthy (<90)' },
+      { start: 90,  end: 100, color: COLORS.caution, label: 'Elevated (90–99)' },
+      { start: 100, end: 120, color: COLORS.warn,    label: 'Borderline high (100–119)' },
+      { start: 120, end: 140, color: COLORS.risk,    label: 'High (120–139)' },
+      { start: 140, end: Infinity, color: COLORS.very, label: 'Very high (≥140)' },
+    ]},
+    { key: 'HDL', csvHeader: 'HDL(mg/dl)', aliases: ['HDL (mg/dl)','HDL (mg/dL)','HDL(mg/dL)'], title: 'HDL Cholesterol', unit: 'mg/dL', category: 'Cardiometabolic', rangesBySex: {
+      male: [
+        { start: 0,  end: 40,  color: COLORS.risk, label: 'Low (<40)' },
         { start: 40, end: 60,  color: COLORS.good, label: 'Normal (40–59)' },
         { start: 60, end: Infinity, color: COLORS.blue, label: 'High (≥60)' },
+      ],
+      female: [
+        { start: 0,  end: 50,  color: COLORS.risk, label: 'Low (<50)' },
+        { start: 50, end: 60,  color: COLORS.good, label: 'Normal (50–59)' },
+        { start: 60, end: Infinity, color: COLORS.blue, label: 'High (≥60)' },
       ]
-    },
-    {
-      key: 'Total Cholesterol',
-      csvHeader: 'Total Cholesterol (mg/dl)',
-      title: 'Total Cholesterol',
-      unit: 'mg/dL',
-      ranges: [
-        { start: 0,   end: 200, color: COLORS.good,    label: 'Optimal (<200)' },
-        { start: 200, end: 240, color: COLORS.caution, label: 'Borderline (200–239)' },
-        { start: 240, end: Infinity, color: COLORS.risk, label: 'High (≥240)' },
-      ]
-    },
-    {
-      key: 'Triglycerides',
-      csvHeader: 'Triglycerides (mg/dl)',
-      title: 'Triglycerides',
-      unit: 'mg/dL',
-      ranges: [
-        { start: 0,   end: 150, color: COLORS.good,    label: 'Normal (<150)' },
-        { start: 150, end: 200, color: COLORS.caution, label: 'Borderline (150–199)' },
-        { start: 200, end: 500, color: COLORS.risk,    label: 'High (200–499)' },
-        { start: 500, end: Infinity, color: COLORS.very, label: 'Very high (≥500)' },
-      ]
-    },
-    {
-      key: 'HBA1C',
-      csvHeader: 'HBA1C (%)',
-      title: 'HbA1c (blood sugar)',
-      unit: '%',
-      ranges: [
-        { start: 0,   end: 5.7, color: COLORS.good,    label: 'Normal (<5.7)' },
-        { start: 5.7, end: 6.4, color: COLORS.caution, label: 'Prediabetes (5.7–6.4)' },
-        { start: 6.4, end: Infinity, color: COLORS.risk, label: 'Diabetes (≥6.4)' },
-      ]
-    },
+    }},
+    { key: 'VLDL', csvHeader: 'VLDL (mg/dl)', aliases: ['VLDL (mg/dL)'], title: 'VLDL Cholesterol', unit: 'mg/dL', category: 'Cardiometabolic', ranges: [
+      { start: 0, end: 30, color: COLORS.good, label: 'Normal (<30)' },
+      { start: 30, end: Infinity, color: COLORS.risk, label: 'High (≥30)' },
+    ]},
+    { key: 'Total Cholesterol', csvHeader: 'Total Cholesterol (mg/dl)', aliases: ['Total Cholesterol (mg/dL)'], title: 'Total Cholesterol', unit: 'mg/dL', category: 'Cardiometabolic', ranges: [
+      { start: 0,   end: 200, color: COLORS.good,    label: 'Optimal (<200)' },
+      { start: 200, end: 240, color: COLORS.caution, label: 'Borderline (200–239)' },
+      { start: 240, end: Infinity, color: COLORS.risk, label: 'High (≥240)' },
+    ]},
+    { key: 'Triglycerides', csvHeader: 'Triglycerides (mg/dl)', aliases: ['Triglycerides (mg/dL)'], title: 'Triglycerides', unit: 'mg/dL', category: 'Cardiometabolic', ranges: [
+      { start: 0,   end: 150, color: COLORS.good,    label: 'Normal (<150)' },
+      { start: 150, end: 200, color: COLORS.caution, label: 'Borderline (150–199)' },
+      { start: 200, end: 500, color: COLORS.risk,    label: 'High (200–499)' },
+      { start: 500, end: Infinity, color: COLORS.very, label: 'Very high (≥500)' },
+    ]},
+    { key: 'HBA1C', csvHeader: 'HBA1C (%)', aliases: ['HbA1c (%)','HbA1C (%)','A1C (%)'], title: 'HbA1c', unit: '%', category: 'Cardiometabolic', ranges: [
+      { start: 0,   end: 5.7, color: COLORS.good,    label: 'Normal (<5.7)' },
+      { start: 5.7, end: 6.5, color: COLORS.caution, label: 'Prediabetes (5.7–6.5)' },
+      { start: 6.5, end: Infinity, color: COLORS.risk, label: 'Diabetes (≥6.5)' },
+    ]},
+
+    // ---------------- Inflammation / Risk ----------------
+    { key: 'hs-CRP', csvHeader: 'hs-CRP (mg/L)', aliases: ['CRP (mg/L)','hsCRP (mg/L)','hsCRP(mg/L)'], title: 'hs-CRP (C-reactive protein)', unit: 'mg/L', category: 'Inflammation', ranges: [
+      { start: 0, end: 1, color: COLORS.good, label: 'Low (<1)' },
+      { start: 1, end: 3, color: COLORS.caution, label: 'Moderate (1–3)' },
+      { start: 3, end: Infinity, color: COLORS.risk, label: 'High (>3)' },
+    ]},
+    { key: 'Homocysteine', csvHeader: 'Homocysteine (umol/L)', aliases: ['Homocysteine (µmol/L)','Homocysteine (umol/l)','Homocysteine (µmol/l)'], title: 'Homocysteine', unit: 'µmol/L', category: 'Inflammation', ranges: [
+      { start: 0, end: 10, color: COLORS.good, label: 'Optimal (<10)' },
+      { start: 10, end: 15, color: COLORS.caution, label: 'Borderline (10–14)' },
+      { start: 15, end: Infinity, color: COLORS.risk, label: 'High (≥15)' },
+    ]},
+
+    // ---------------- Thyroid ----------------
+    { key: 'TSH', csvHeader: 'TSH (uIU/mL)', aliases: ['TSH (mIU/L)','TSH (µIU/mL)'], title: 'TSH', unit: 'µIU/mL', category: 'Thyroid', ranges: [
+      { start: 0, end: 0.4, color: COLORS.caution, label: 'Low (<0.4)' },
+      { start: 0.4, end: 4.0, color: COLORS.good, label: 'Normal (0.4–4.0)' },
+      { start: 4.0, end: Infinity, color: COLORS.risk, label: 'High (>4.0)' },
+    ]},
+    { key: 'Free T4', csvHeader: 'Free T4 (ng/dL)', aliases: ['FT4 (ng/dL)','FreeT4 (ng/dL)'], title: 'Free T4', unit: 'ng/dL', category: 'Thyroid', ranges: [
+      { start: 0, end: 0.8, color: COLORS.caution, label: 'Low' },
+      { start: 0.8, end: 1.8, color: COLORS.good, label: 'Normal' },
+      { start: 1.8, end: Infinity, color: COLORS.caution, label: 'High' },
+    ]},
+    { key: 'Free T3', csvHeader: 'Free T3 (pg/mL)', aliases: ['FT3 (pg/mL)','FreeT3 (pg/mL)'], title: 'Free T3', unit: 'pg/mL', category: 'Thyroid', ranges: [
+      { start: 0, end: 2.3, color: COLORS.caution, label: 'Low' },
+      { start: 2.3, end: 4.2, color: COLORS.good, label: 'Normal' },
+      { start: 4.2, end: Infinity, color: COLORS.caution, label: 'High' },
+    ]},
+    { key: 'TPO Ab', csvHeader: 'TPO Ab (IU/mL)', aliases: ['TPOAb (IU/mL)','TPO antibodies (IU/mL)'], title: 'TPO Antibodies', unit: 'IU/mL', category: 'Thyroid', ranges: [
+      { start: 0, end: 35, color: COLORS.good, label: 'Normal (<35)' },
+      { start: 35, end: Infinity, color: COLORS.risk, label: 'Positive (≥35)' },
+    ]},
+
+    // ---------------- Hormones ----------------
+    { key: 'Estradiol', csvHeader: 'Estradiol (pg/mL)', title: 'Estradiol', unit: 'pg/mL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (context dependent)' } ] },
+    { key: 'Progesterone', csvHeader: 'Progesterone (ng/mL)', title: 'Progesterone', unit: 'ng/mL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (context dependent)' } ] },
+    { key: 'LH', csvHeader: 'LH (mIU/mL)', title: 'LH', unit: 'mIU/mL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (context dependent)' } ] },
+    { key: 'FSH', csvHeader: 'FSH (mIU/mL)', title: 'FSH', unit: 'mIU/mL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (context dependent)' } ] },
+    { key: 'Total Testosterone', csvHeader: 'Total Testosterone (ng/dL)', title: 'Total Testosterone', unit: 'ng/dL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (context dependent)' } ] },
+    { key: 'Free Testosterone', csvHeader: 'Free Testosterone (pg/mL)', title: 'Free Testosterone', unit: 'pg/mL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (context dependent)' } ] },
+    { key: 'Cortisol', csvHeader: 'Cortisol (ug/dL)', title: 'Cortisol', unit: 'µg/dL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (time-of-day dependent)' } ] },
+    { key: 'DHEA-S', csvHeader: 'DHEA-S (ug/dL)', aliases: ['DHEA (ug/dL)','DHEA-S (µg/dL)'], title: 'DHEA-S', unit: 'µg/dL', category: 'Hormonal', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only (context dependent)' } ] },
+
+    // ---------------- Micronutrients ----------------
+    { key: 'Vitamin D', csvHeader: 'Vitamin D (ng/mL)', aliases: ['25(OH)D (ng/mL)','25-OH Vitamin D (ng/mL)'], title: 'Vitamin D (25-OH)', unit: 'ng/mL', category: 'Micronutrients', ranges: [
+      { start: 0, end: 20, color: COLORS.risk, label: 'Deficient (<20)' },
+      { start: 20, end: 30, color: COLORS.caution, label: 'Insufficient (20–29)' },
+      { start: 30, end: 60, color: COLORS.good, label: 'Sufficient (30–60)' },
+      { start: 60, end: Infinity, color: COLORS.caution, label: 'High (>60)' },
+    ]},
+    { key: 'Vitamin B12', csvHeader: 'Vitamin B12 (pg/mL)', aliases: ['B12 (pg/mL)'], title: 'Vitamin B12', unit: 'pg/mL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Folate', csvHeader: 'Folate (ng/mL)', title: 'Folate', unit: 'ng/mL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Magnesium', csvHeader: 'Magnesium (mg/dL)', title: 'Magnesium', unit: 'mg/dL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Zinc', csvHeader: 'Zinc (ug/dL)', aliases: ['Zinc (µg/dL)'], title: 'Zinc', unit: 'µg/dL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Copper', csvHeader: 'Copper (ug/dL)', aliases: ['Copper (µg/dL)'], title: 'Copper', unit: 'µg/dL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Selenium', csvHeader: 'Selenium (ug/L)', aliases: ['Selenium (µg/L)'], title: 'Selenium', unit: 'µg/L', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Iodine', csvHeader: 'Iodine (ug/L)', aliases: ['Iodine (µg/L)'], title: 'Iodine', unit: 'µg/L', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Iron', csvHeader: 'Iron (ug/dL)', aliases: ['Iron (µg/dL)'], title: 'Iron', unit: 'µg/dL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Vitamin A', csvHeader: 'Vitamin A (ug/dL)', aliases: ['Vitamin A (µg/dL)'], title: 'Vitamin A', unit: 'µg/dL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Vitamin C', csvHeader: 'Vitamin C (mg/dL)', title: 'Vitamin C', unit: 'mg/dL', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+    { key: 'Vitamin E', csvHeader: 'Vitamin E (mg/L)', title: 'Vitamin E', unit: 'mg/L', category: 'Micronutrients', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Reference interval varies / trend' } ] },
+
+    // ---------------- Body Composition ----------------
+    { key: 'Body Weight', csvHeader: 'Body Weight (lb)', aliases: ['Weight (lb)','Body Weight'], title: 'Body Weight', unit: 'lb', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
+    { key: 'Body Fat % (BIA)', csvHeader: 'Body Fat % (BIA)', aliases: ['Body Fat % (Bioimpedance)','Body Fat % (BIA) (%)'], title: 'Body Fat % (BIA)', unit: '%', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
+    { key: 'Body Fat % (DEXA)', csvHeader: 'Body Fat % (DEXA)', aliases: ['Body Fat % (DXA)'], title: 'Body Fat % (DEXA)', unit: '%', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
+    { key: 'Body Fat % (Calipers)', csvHeader: 'Body Fat % (Calipers)', aliases: ['Body Fat % (Skinfold)','Body Fat % (Calipers) (%)'], title: 'Body Fat % (Calipers)', unit: '%', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
+    { key: 'Body Fat %', csvHeader: 'Body Fat %', title: 'Body Fat % (Generic)', unit: '%', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
+    { key: 'Body Fat Mass', csvHeader: 'Body Fat Mass (lb)', aliases: ['Fat Mass (lb)','Body Fat (lb)'], title: 'Body Fat Mass', unit: 'lb', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
+    { key: 'Lean Mass', csvHeader: 'Lean Mass (lb)', aliases: ['Lean Body Mass (lb)','LBM (lb)'], title: 'Lean Mass', unit: 'lb', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
+    { key: 'Visceral Fat', csvHeader: 'Visceral Fat', title: 'Visceral Fat', unit: '', category: 'Body Composition', ranges: [ { start: 0, end: Infinity, color: COLORS.blue, label: 'Trend only' } ] },
   ];
 
   const SECTIONS = [
-    { title: 'Cardiometabolic Trends', keys: ['LDL','Apo B','HDL','Total Cholesterol','Triglycerides','HBA1C'] },
-    { title: 'Hormonal Health Trends', keys: [] },
+    { title: 'Cardiometabolic Trends', keys: ['LDL','Apo B','HDL','Total Cholesterol','Triglycerides','VLDL','HBA1C'] },
+    { title: 'Inflammation / Risk Markers', keys: ['hs-CRP','Homocysteine'] },
+    { title: 'Thyroid Health', keys: ['TSH','Free T4','Free T3','TPO Ab'] },
+    { title: 'Hormonal Health', keys: ['Cortisol','DHEA-S','Estradiol','Progesterone','LH','FSH','Total Testosterone','Free Testosterone'] },
+    { title: 'Micronutrients', keys: ['Vitamin D','Iron','Vitamin B12','Folate','Magnesium','Zinc','Copper','Selenium','Iodine','Vitamin A','Vitamin C','Vitamin E'] },
+    { title: 'Body Composition', keys: ['Body Weight','Body Fat % (BIA)','Body Fat % (DEXA)','Body Fat % (Calipers)','Body Fat %','Body Fat Mass','Lean Mass','Visceral Fat'] },
   ];
 
   // -------------------------
@@ -851,7 +988,6 @@
   const elPreview = document.getElementById('preview');
   const elCharts = document.getElementById('charts');
   const btnSample = document.getElementById('btnSample');
-  const btnClear = document.getElementById('btnClear');
   const tooltip = createTooltip();
   const setupModal = document.getElementById('setupModal');
   const setupBody = document.getElementById('setupBody');
@@ -862,7 +998,7 @@
   const btnBackSetup = document.getElementById('backSetup');
   let setupStep = 0;
   const setupSteps = 5;
-  const selectedMetrics = new Set(METRICS.map((m) => m.key));
+  const selectedMetrics = new Set();
   let templateMode = 'download';
 
   elFile.addEventListener('change', async (e) => {
@@ -908,13 +1044,6 @@
     updateSetupStep();
   });
 
-  btnClear.addEventListener('click', () => {
-    elFile.value = '';
-    elPreview.textContent = '(upload a CSV)';
-    elCharts.innerHTML = '';
-    setStatus('No file loaded.', false);
-  });
-
   function setStatus(msg, isError){
     elStatus.textContent = msg;
     elStatus.className = 'status' + (isError ? ' error' : '');
@@ -941,20 +1070,13 @@
         <ol class="listSteps">
           <li>Choose which metrics you want to track.</li>
           <li>Download the template CSV file or copy it as text and save it as a CSV.</li>
-		  <li>Open the CSV in a spreadsheet program, like Excel or LibreOffice, and fill in your test dates and results. (Results can be left blank in a row if that metric wasn't tested on that date)</li>
+          <li>Open the CSV in a spreadsheet program, like Excel or LibreOffice, and fill in your test dates and results. (Results can be left blank in a row if that metric wasn't tested on that date)</li>
           <li>Select that CSV here to visualize your results.</li>
         </ol>
       `,
       `
-        <strong>Choose which metrics to include:</strong>
-        <div class="metricList">
-          ${METRICS.map((metric) => `
-            <label class="metricItem">
-              <input type="checkbox" data-metric="${metric.key}" ${selectedMetrics.has(metric.key) ? 'checked' : ''} />
-              ${metric.title}
-            </label>
-          `).join('')}
-        </div>
+        <div class="setupSticky"><strong>Choose which metrics to include:</strong></div>
+        <div id="metricCategoryList"></div>
       `,
       templateMode === 'download'
         ? `
@@ -980,7 +1102,7 @@
       `
         <strong>Time to fill out your CSV</strong>
         <p class="sub">Simply open the CSV like a spreadsheet and fill it out with your results.</p>
-		<p class="sub">Each row is a new test date, so only include any measurements that were taken on that date.</p>
+        <p class="sub">Each row is a new test date, so only include any measurements that were taken on that date.</p>
         <div class="tutorialAnimation" role="img" aria-label="Animated CSV tutorial showing data entry for date, LDL, and total cholesterol.">
           <div class="tutorialTable">
             <div class="tutorialRow tutorialHeader">
@@ -1011,18 +1133,82 @@
     ];
 
     setupBody.innerHTML = bodies[setupStep] ?? bodies[0];
+
     if (setupStep === 2){
-      setupBody.querySelectorAll('input[type="checkbox"][data-metric]').forEach((input) => {
-        input.addEventListener('change', (event) => {
-          const key = event.target.dataset.metric;
-          if (!key) return;
-          if (event.target.checked){
-            selectedMetrics.add(key);
-          } else {
-            selectedMetrics.delete(key);
-          }
+      const container = setupBody.querySelector('#metricCategoryList');
+      container.innerHTML = '';
+
+      // group metrics by category (stable order)
+      const categoryOrder = ['Cardiometabolic','Inflammation','Thyroid','Hormonal','Micronutrients','Body Composition'];
+      const groups = {};
+      for (const m of METRICS){
+        const cat = m.category || 'Other';
+        groups[cat] = groups[cat] || [];
+        groups[cat].push(m);
+      }
+
+      // ensure stable ordering (and keep any unknown categories at the end)
+      const orderedCats = [...categoryOrder.filter(c => groups[c]?.length), ...Object.keys(groups).filter(c => !categoryOrder.includes(c))];
+
+      for (const cat of orderedCats){
+        const items = groups[cat].slice().sort((a,b)=>a.title.localeCompare(b.title));
+        const block = document.createElement('div');
+        block.className = 'metricCat';
+
+        const header = document.createElement('button');
+        header.type = 'button';
+        header.className = 'metricCatHeader';
+        header.setAttribute('aria-expanded', 'false');
+        header.innerHTML = `<span class="metricCatTitle">${cat}</span><span class="metricCatChevron" aria-hidden="true">˅</span>`;
+
+        const list = document.createElement('div');
+        list.className = 'metricChipList';
+
+        let expanded = false;
+        function update(){
+          list.style.display = expanded ? 'flex' : 'none';
+          header.classList.toggle('expanded', expanded);
+          header.setAttribute('aria-expanded', String(expanded));
+        }
+
+        header.addEventListener('click', () => {
+          expanded = !expanded;
+          update();
         });
-      });
+
+        for (const metric of items){
+          const chip = document.createElement('label');
+          const checked = selectedMetrics.has(metric.key);
+          chip.className = 'metricChip' + (checked ? ' selected' : '');
+
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'metricCb';
+          cb.dataset.metric = metric.key;
+          cb.checked = checked;
+
+          const text = document.createElement('span');
+          text.className = 'metricChipText';
+          text.textContent = metric.title;
+
+          chip.appendChild(cb);
+          chip.appendChild(text);
+
+          cb.addEventListener('change', (event) => {
+            const key = event.target.dataset.metric;
+            if (event.target.checked) selectedMetrics.add(key);
+            else selectedMetrics.delete(key);
+            chip.classList.toggle('selected', event.target.checked);
+          });
+
+          list.appendChild(chip);
+        }
+
+        block.appendChild(header);
+        block.appendChild(list);
+        container.appendChild(block);
+        update();
+      }
     }
 
     if (setupStep === 3){
@@ -1030,6 +1216,7 @@
       if (templateText){
         templateText.value = buildTemplateText();
       }
+
       const copyBtn = setupBody.querySelector('#copyTemplate');
       if (copyBtn){
         copyBtn.addEventListener('click', () => {
@@ -1047,6 +1234,7 @@
           }
         });
       }
+
       const downloadBtn = setupBody.querySelector('#downloadTemplate');
       if (downloadBtn){
         downloadBtn.addEventListener('click', () => {
@@ -1062,6 +1250,7 @@
           URL.revokeObjectURL(url);
         });
       }
+
       const showCopy = setupBody.querySelector('#showCopyTemplate');
       if (showCopy){
         showCopy.addEventListener('click', () => {
@@ -1069,6 +1258,7 @@
           updateSetupStep();
         });
       }
+
       const showDownload = setupBody.querySelector('#showDownloadTemplate');
       if (showDownload){
         showDownload.addEventListener('click', () => {
@@ -1081,6 +1271,21 @@
 
   function metricHeader(metric){
     return metric.csvHeader;
+  }
+
+  function metricHeaders(metric){
+    const headers = [];
+    if (metric?.csvHeader) headers.push(metric.csvHeader);
+    if (Array.isArray(metric?.aliases)) headers.push(...metric.aliases);
+    return headers;
+  }
+
+  function findFirstHeaderIndex(idxMap, headers){
+    for (const h of headers){
+      const i = idxMap.get(normalizeHeader(h));
+      if (i != null) return i;
+    }
+    return null;
   }
 
   function buildTemplateText(){
@@ -1108,25 +1313,20 @@
     document.body.appendChild(temp);
     temp.focus();
     temp.select();
-    try{
-      document.execCommand('copy');
-    } finally {
-      document.body.removeChild(temp);
-    }
+    try{ document.execCommand('copy'); }
+    finally { document.body.removeChild(temp); }
   }
 
   // -------------------------
   // CSV parsing + normalization
   // -------------------------
   function handleCsvText(text, filename){
-    // Show preview (first ~30 lines)
     const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/);
     elPreview.textContent = lines.slice(0, 30).join('\n');
 
     let rows;
-    try{
-      rows = parseCsv(text);
-    }catch(err){
+    try{ rows = parseCsv(text); }
+    catch(err){
       console.error(err);
       setStatus('Could not parse CSV. Check for mismatched quotes/commas.', true);
       elCharts.innerHTML = '';
@@ -1139,7 +1339,6 @@
       return;
     }
 
-    // Normalize headers
     const header = rows[0].map(h => (h ?? '').trim().replace(/^\uFEFF/, ''));
     const idx = new Map(header.map((h,i)=>[normalizeHeader(h),i]));
     const columnIndex = new Map();
@@ -1147,7 +1346,7 @@
 
     columnIndex.set('Date', idx.get('date'));
     for (const metric of METRICS){
-      const metricIndex = idx.get(normalizeHeader(metricHeader(metric)));
+      const metricIndex = findFirstHeaderIndex(idx, metricHeaders(metric));
       columnIndex.set(metric.key, metricIndex);
       if (metricIndex != null){
         availableMetrics.add(metric.key);
@@ -1171,13 +1370,10 @@
     for (let r = 1; r < rows.length; r++){
       const row = rows[r];
       const dateStr = (row[columnIndex.get('Date')] ?? '').trim();
-      if (!dateStr) continue; // skip blank rows
+      if (!dateStr) continue;
 
       const date = parseMDY(dateStr);
-      if (!date){
-        // Skip invalid date rows
-        continue;
-      }
+      if (!date) continue;
 
       const obj = { Date: date, _rawDate: dateStr };
       for (const m of METRICS){
@@ -1194,7 +1390,6 @@
       return;
     }
 
-    // Sort by date
     parsed.sort((a,b)=>a.Date - b.Date);
 
     setStatus(`Loaded ${filename} — ${parsed.length} row(s).`, false);
@@ -1210,20 +1405,17 @@
   }
 
   function parseMDY(s){
-    // Accept M/D/YYYY or MM/DD/YYYY
     const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (!m) return null;
     const mm = Number(m[1]);
     const dd = Number(m[2]);
     const yy = Number(m[3]);
     const d = new Date(yy, mm - 1, dd);
-    // Validate
     if (d.getFullYear() !== yy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
     return d;
   }
 
   function parseCsv(text){
-    // Minimal CSV parser that handles quotes.
     const s = text.replace(/^\uFEFF/, '');
     const rows = [];
     let row = [];
@@ -1267,16 +1459,12 @@
         continue;
       }
 
-      if (ch === '\r'){
-        continue;
-      }
+      if (ch === '\r') continue;
 
       cur += ch;
     }
 
-    // flush last field
     row.push(cur);
-    // Only push if there is at least one non-empty cell
     if (row.some(v => (v ?? '').trim() !== '')) rows.push(row);
 
     return rows;
@@ -1291,8 +1479,40 @@
   // -------------------------
   function renderAll(dataRows, availableMetrics){
     elCharts.innerHTML = '';
+
     const container = document.createElement('div');
     container.className = 'chartCard';
+
+    // Sex toggle (reference ranges)
+    const toggle = document.createElement('div');
+    toggle.className = 'card';
+    toggle.style.padding = '12px';
+    toggle.style.marginBottom = '10px';
+    toggle.innerHTML = `
+      <div class="controls" style="justify-content:space-between;">
+        <div style="font-weight:900;">Reference ranges:</div>
+        <div class="controls">
+          <label style="display:flex;align-items:center;gap:6px;">
+            <input type="radio" name="sexToggle" value="male" ${CURRENT_SEX === 'male' ? 'checked' : ''}>
+            Men
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;">
+            <input type="radio" name="sexToggle" value="female" ${CURRENT_SEX === 'female' ? 'checked' : ''}>
+            Women
+          </label>
+        </div>
+      </div>
+    `;
+    container.appendChild(toggle);
+
+    toggle.querySelectorAll('input[name="sexToggle"]').forEach((el) => {
+      el.addEventListener('change', () => {
+        const checked = toggle.querySelector('input[name="sexToggle"]:checked');
+        CURRENT_SEX = checked ? checked.value : CURRENT_SEX;
+        localStorage.setItem('chartSex', CURRENT_SEX);
+        renderAll(dataRows, availableMetrics);
+      });
+    });
 
     for (const sec of SECTIONS){
       const metricsInSection = sec.keys.filter((key) => availableMetrics.has(key));
@@ -1301,11 +1521,17 @@
       section.className = 'sectionBlock';
       section.innerHTML = `
         <div class="sectionTitle">${escapeHtml(sec.title)} ( ${formatSpan(dataRows)} )</div>
-        <div class="note">Colored bands are reference categories. The line is your trend. Values are labeled at each measurement.</div>
+        <div class="note">Colored bands are reference categories (${CURRENT_SEX === 'male' ? 'Men' : 'Women'}). The line is your trend. Values are labeled at each measurement.</div>
       `;
 
       for (const key of metricsInSection){
         const metric = METRICS.find(m => m.key === key);
+        // resolve sex-specific ranges if present
+        if (metric.rangesBySex){
+          metric._resolvedRanges = metric.rangesBySex[CURRENT_SEX] || metric.rangesBySex.male;
+        } else {
+          metric._resolvedRanges = metric.ranges;
+        }
         const svg = makeChartSvg(dataRows, metric);
         section.appendChild(svg);
       }
@@ -1324,8 +1550,6 @@
   }
 
   function recommendedYTop(maxVal, ranges){
-    // Tighten y-axis: show context up to the band ceiling you're actually in,
-    // rather than zooming out to the highest extreme cutoff.
     let bandEnd = null;
     for (const r of ranges){
       if (r.end === Infinity){
@@ -1362,7 +1586,8 @@
     const xMax = maxT + padT;
 
     const maxV = hasData ? Math.max(...values) : 1;
-    const yTop = recommendedYTop(maxV, metric.ranges);
+    const activeRanges = metric._resolvedRanges || metric.ranges;
+    const yTop = recommendedYTop(maxV, activeRanges);
     const yMin = 0;
 
     const x = (date) => margin.left + ((date.getTime() - xMin) / (xMax - xMin)) * plotW;
@@ -1373,6 +1598,9 @@
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.style.display = 'block';
     svg.style.margin = '10px 0 14px';
+
+    const defs = elNS('defs');
+    svg.appendChild(defs);
 
     // Background
     svg.appendChild(rect(0,0,W,H,'rgba(255,255,255,0.015)'));
@@ -1393,14 +1621,16 @@
       rotateOrigin: `14 ${margin.top + plotH/2}`
     }));
 
-    // Bands (contiguous; avoids white stripes)
-    for (const r of metric.ranges){
+    // Bands
+    const activeRanges2 = metric._resolvedRanges || metric.ranges;
+    for (const r of activeRanges2){
       const start = r.start;
       const end = (r.end === Infinity ? yTop : Math.min(r.end, yTop));
       if (start >= yTop) continue;
 
       const y1 = y(end);
       const y2 = y(start);
+
       svg.appendChild(rect(margin.left, y1, plotW, (y2 - y1), r.color, 0.60));
 
       // Right-side label
@@ -1479,13 +1709,11 @@
         svg.appendChild(point);
         attachTooltipHandlers(svg, point, metric);
 
-        // value label with white pill background
         const label = formatValue(p.v, metric.key);
         const padX = 6;
         const padY = 4;
         const textSize = 12;
 
-        // approximate text width (good enough)
         const approxW = Math.max(20, label.length * 7.1);
         const boxW = approxW + padX*2;
         const boxH = textSize + padY*2;
@@ -1511,42 +1739,33 @@
     const span = maxT - minT;
     if (span <= 0) return [minT, maxT];
 
-    // choose tick spacing roughly based on span
     const day = 86400000;
-    const month = 30*day;
     const year = 365*day;
 
     let step;
-    if (span <= 120*day) step = 30*day;           // ~monthly
-    else if (span <= 540*day) step = 90*day;      // ~quarterly
-    else if (span <= 2.5*year) step = 180*day;    // ~semiannual
+    if (span <= 120*day) step = 30*day;
+    else if (span <= 540*day) step = 90*day;
+    else if (span <= 2.5*year) step = 180*day;
     else step = 365*day;
 
-    // start at nearest step boundary
-    let t = minT;
-    // just evenly distribute if very short
     const target = Math.min(6, Math.max(3, count));
     const approx = Math.floor(span / step) + 1;
 
     if (approx < target){
-      // evenly spaced
       for (let i=0; i<target; i++){
         ticks.push(minT + (span * i)/(target-1));
       }
       return ticks;
     }
 
-    // walk forward in steps
+    let t = minT;
     while (t <= maxT + 1){
       ticks.push(t);
       t += step;
       if (ticks.length > 8) break;
     }
 
-    // ensure last tick near end
     if (ticks[ticks.length-1] < maxT - step*0.35) ticks.push(maxT);
-
-    // de-dup close ticks
     return ticks.filter((v,i,a)=> i===0 || Math.abs(v-a[i-1]) > step*0.35);
   }
 
@@ -1563,7 +1782,6 @@
 
   function formatValue(v, key){
     if (key === 'HBA1C') return v.toFixed(1);
-    // avoid trailing .0 for integers
     return Number.isInteger(v) ? String(v) : String(v);
   }
 
@@ -1576,36 +1794,32 @@
 
   function formatTick(v, key){
     if (key === 'HBA1C') return v.toFixed(1);
-    // show clean integers
     const rounded = Math.round(v);
     return String(rounded);
   }
 
   function findCategory(metric, value){
-    for (const r of metric.ranges){
+    const ranges = metric._resolvedRanges || metric.ranges || [];
+    if (!ranges.length){
+      return { label: 'No reference range', color: COLORS.blue };
+    }
+    for (const r of ranges){
       if (value >= r.start && (value < r.end || r.end === Infinity)){
         return r;
       }
     }
-    return metric.ranges[metric.ranges.length - 1];
+    return ranges[ranges.length - 1];
   }
 
   function categoryTextColor(rangeColor){
     switch (rangeColor){
-      case COLORS.good:
-        return TEXT_COLORS.good;
-      case COLORS.caution:
-        return TEXT_COLORS.caution;
-      case COLORS.warn:
-        return TEXT_COLORS.warn;
-      case COLORS.risk:
-        return TEXT_COLORS.risk;
-      case COLORS.very:
-        return TEXT_COLORS.very;
-      case COLORS.blue:
-        return TEXT_COLORS.blue;
-      default:
-        return TEXT_COLORS.good;
+      case COLORS.good: return TEXT_COLORS.good;
+      case COLORS.caution: return TEXT_COLORS.caution;
+      case COLORS.warn: return TEXT_COLORS.warn;
+      case COLORS.risk: return TEXT_COLORS.risk;
+      case COLORS.very: return TEXT_COLORS.very;
+      case COLORS.blue: return TEXT_COLORS.blue;
+      default: return TEXT_COLORS.good;
     }
   }
 
@@ -1671,6 +1885,8 @@
     window.addEventListener('scroll', () => hideTooltip());
     return tip;
   }
+
+  // (Stripe pattern helpers removed — no longer needed now that the sex toggle selects a single reference range set.)
 
   // -------------------------
   // SVG helper functions
