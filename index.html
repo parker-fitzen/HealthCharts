@@ -263,6 +263,55 @@
       font-size: 12px;
     }
 
+    .chartWindow{
+      padding: 10px;
+      margin: 10px 0 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+    }
+
+    .chartWindowHeader{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 2px 6px 6px;
+    }
+
+    .chartWindowTitle{
+      font-weight: 900;
+      color: #1f2a44;
+      letter-spacing: .2px;
+      font-size: 15px;
+    }
+
+    .chartZoom{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .chartZoom input[type=range]{
+      width: 130px;
+      accent-color: #6366f1;
+    }
+
+    .chartZoomValue{
+      min-width: 34px;
+      text-align: right;
+      font-weight: 800;
+      color: #1f2a44;
+    }
+
     .chartTooltip{
       position: fixed;
       background: rgba(255,255,255,0.98);
@@ -825,6 +874,9 @@
       button{ width: 100%; }
       .toggleRow{ align-items: stretch; }
       .sexToggle{ width: 100%; }
+      .chartWindowHeader{ flex-direction: column; align-items: flex-start; }
+      .chartZoom{ width: 100%; justify-content: space-between; }
+      .chartZoom input[type=range]{ width: 100%; }
       .chartTooltip{ font-size: 13px; }
       .chartTooltip .label{ font-size: 12px; }
     }
@@ -1052,6 +1104,7 @@ const METRICS = [
   const btnCloseSetup = document.getElementById('closeSetup');
   const btnNextSetup = document.getElementById('nextSetup');
   const btnBackSetup = document.getElementById('backSetup');
+  const chartZoomLevels = new Map();
   let setupStep = 0;
   const setupSteps = 5;
   const selectedMetrics = new Set();
@@ -1091,6 +1144,10 @@ const METRICS = [
   });
 
   btnNextSetup.addEventListener('click', () => {
+    if (setupStep === setupSteps - 1){
+      setupModal.classList.remove('show');
+      return;
+    }
     setupStep = Math.min(setupStep + 1, setupSteps - 1);
     updateSetupStep();
   });
@@ -1588,8 +1645,8 @@ const METRICS = [
         } else {
           metric._resolvedRanges = metric.ranges;
         }
-        const svg = makeChartSvg(dataRows, metric);
-        section.appendChild(svg);
+        const chartBlock = makeChartSvg(dataRows, metric, availableMetrics);
+        section.appendChild(chartBlock);
       }
 
       container.appendChild(section);
@@ -1622,7 +1679,7 @@ const METRICS = [
     return fromData * 1.10;
   }
 
-  function makeChartSvg(rows, metric){
+  function makeChartSvg(rows, metric, availableMetrics){
     const isMobile = window.innerWidth <= 720;
     const W = 980;
     const H = isMobile ? 300 : 260;
@@ -1648,8 +1705,14 @@ const METRICS = [
     const spanT = Math.max(1, maxT - minT);
     const padT = spanT * 0.10;
 
-    const xMin = minT - padT;
-    const xMax = maxT + padT;
+    const baseMin = minT - padT;
+    const baseMax = maxT + padT;
+    const zoom = chartZoomLevels.get(metric.key) ?? 1;
+    const baseSpan = baseMax - baseMin;
+    const zoomSpan = baseSpan / zoom;
+    const centerT = (minT + maxT) / 2;
+    const xMin = centerT - zoomSpan / 2;
+    const xMax = centerT + zoomSpan / 2;
 
     const maxV = hasData ? Math.max(...values) : 1;
     const activeRanges = metric._resolvedRanges || metric.ranges;
@@ -1659,24 +1722,47 @@ const METRICS = [
     const x = (date) => margin.left + ((date.getTime() - xMin) / (xMax - xMin)) * plotW;
     const y = (val)  => margin.top + (1 - ((val - yMin) / (yTop - yMin))) * plotH;
 
+    const wrapper = document.createElement('div');
+    wrapper.className = 'chartWindow';
+
+    const header = document.createElement('div');
+    header.className = 'chartWindowHeader';
+    header.innerHTML = `
+      <div class="chartWindowTitle">${escapeHtml(metric.title)}</div>
+      <label class="chartZoom">
+        <span>Zoom</span>
+        <input type="range" min="0.5" max="4" step="0.25" value="${zoom}">
+        <span class="chartZoomValue">${zoom.toFixed(2)}x</span>
+      </label>
+    `;
+    wrapper.appendChild(header);
+
+    const zoomInput = header.querySelector('input[type="range"]');
+    const zoomValue = header.querySelector('.chartZoomValue');
+    zoomInput.addEventListener('input', (event) => {
+      const value = Number(event.target.value);
+      chartZoomLevels.set(metric.key, value);
+      zoomValue.textContent = `${value.toFixed(2)}x`;
+      renderAll(rows, availableMetrics);
+    });
+
     const svg = elNS('svg');
     svg.setAttribute('width', '100%');
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.style.display = 'block';
-    svg.style.margin = '10px 0 14px';
+    svg.style.margin = '0';
 
     const defs = elNS('defs');
     svg.appendChild(defs);
 
+    const clipId = `clip-${metric.key.replace(/\s+/g, '-').toLowerCase()}`;
+    const clipPath = elNS('clipPath');
+    clipPath.setAttribute('id', clipId);
+    clipPath.appendChild(rect(margin.left, margin.top, plotW, plotH, '#fff'));
+    defs.appendChild(clipPath);
+
     // Background
     svg.appendChild(rect(0,0,W,H,'rgba(255,255,255,0.015)'));
-
-    // Title
-    svg.appendChild(textEl(metric.title, margin.left, 18, {
-      size: fontSizes.title,
-      weight: 900,
-      fill: '#1f2a44'
-    }));
 
     // Y-axis label
     svg.appendChild(textEl(metric.unit, 14, margin.top + plotH/2, {
@@ -1742,7 +1828,12 @@ const METRICS = [
     // Build series points
     const pts = rows
       .filter(r => r[metric.key] != null)
-      .map(r => ({ d: r.Date, v: r[metric.key], rawDate: r._rawDate }));
+      .map(r => ({ d: r.Date, v: r[metric.key], rawDate: r._rawDate }))
+      .filter(p => p.d.getTime() >= xMin && p.d.getTime() <= xMax);
+
+    const plotGroup = elNS('g');
+    plotGroup.setAttribute('clip-path', `url(#${clipId})`);
+    svg.appendChild(plotGroup);
 
     // Line
     if (pts.length >= 1){
@@ -1753,14 +1844,14 @@ const METRICS = [
       pEl.setAttribute('stroke', '#1f2a44');
       pEl.setAttribute('stroke-width', '4');
       pEl.setAttribute('opacity', '0.55');
-      svg.appendChild(pEl);
+      plotGroup.appendChild(pEl);
 
       const pEl2 = elNS('path');
       pEl2.setAttribute('d', path);
       pEl2.setAttribute('fill', 'none');
       pEl2.setAttribute('stroke', '#4b5563');
       pEl2.setAttribute('stroke-width', '2.5');
-      svg.appendChild(pEl2);
+      plotGroup.appendChild(pEl2);
 
       // Points + labels
       for (const p of pts){
@@ -1772,7 +1863,7 @@ const METRICS = [
         point.dataset.date = p.rawDate || '';
         point.dataset.dateFormatted = formatFullDate(p.rawDate, p.d);
         point.dataset.metric = metric.key;
-        svg.appendChild(point);
+        plotGroup.appendChild(point);
         attachTooltipHandlers(svg, point, metric);
 
         const label = formatValue(p.v, metric.key);
@@ -1787,8 +1878,8 @@ const METRICS = [
         const bx = cx - boxW/2;
         const by = cy - 22 - boxH/2;
 
-        svg.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
-        svg.appendChild(textEl(label, cx, by + boxH/2 + 4, {
+        plotGroup.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
+        plotGroup.appendChild(textEl(label, cx, by + boxH/2 + 4, {
           size: textSize,
           weight: 900,
           fill: '#1f2a44',
@@ -1797,7 +1888,8 @@ const METRICS = [
       }
     }
 
-    return svg;
+    wrapper.appendChild(svg);
+    return wrapper;
   }
 
   function makeTimeTicks(minT, maxT, count){
