@@ -243,6 +243,42 @@
       letter-spacing: .2px;
     }
 
+    .chartShell{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 4px 12px;
+    }
+
+    .chartZoomHint{
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 10px;
+      flex-wrap: wrap;
+    }
+
+    .chartZoomLabel{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .chartWindow{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.65);
+      padding: 6px;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .chartWindow.isPanning{
+      cursor: grabbing;
+    }
+
     .sectionTitle{
       margin: 18px 0 2px;
       padding: 0 10px;
@@ -903,6 +939,14 @@
   };
 
   let CURRENT_SEX = (localStorage.getItem('chartSex') || 'male');
+  const CHART_ZOOM = new Map();
+  const CHART_PAN = new Map();
+  const ZOOM_SETTINGS = {
+    min: 0.6,
+    max: 3,
+    step: 0.2,
+    default: 1
+  };
 
 const METRICS = [
     // ---------------- Cardiometabolic ----------------
@@ -1091,6 +1135,10 @@ const METRICS = [
   });
 
   btnNextSetup.addEventListener('click', () => {
+    if (setupStep === setupSteps - 1){
+      setupModal.classList.remove('show');
+      return;
+    }
     setupStep = Math.min(setupStep + 1, setupSteps - 1);
     updateSetupStep();
   });
@@ -1588,8 +1636,63 @@ const METRICS = [
         } else {
           metric._resolvedRanges = metric.ranges;
         }
-        const svg = makeChartSvg(dataRows, metric);
-        section.appendChild(svg);
+
+        const chartShell = document.createElement('div');
+        chartShell.className = 'chartShell';
+
+        const zoomHint = document.createElement('div');
+        zoomHint.className = 'chartZoomHint';
+
+        const zoomLabel = document.createElement('div');
+        zoomLabel.className = 'chartZoomLabel';
+        zoomLabel.textContent = 'Pinch to zoom, drag to pan';
+
+        const chartWindow = document.createElement('div');
+        chartWindow.className = 'chartWindow';
+
+        zoomHint.appendChild(zoomLabel);
+        chartShell.appendChild(zoomHint);
+        chartShell.appendChild(chartWindow);
+        section.appendChild(chartShell);
+
+        const getZoom = () => CHART_ZOOM.get(metric.key) ?? ZOOM_SETTINGS.default;
+        const setPan = (offset, zoomValue) => {
+          const minT = dataRows[0].Date.getTime();
+          const maxT = dataRows[dataRows.length-1].Date.getTime();
+          const spanT = Math.max(1, maxT - minT);
+          const mid = (minT + maxT) / 2;
+          const zoom = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, zoomValue));
+          const windowSpan = spanT / zoom;
+          const half = windowSpan / 2;
+          const minCenter = minT + half;
+          const maxCenter = maxT - half;
+          let center = mid + offset;
+          if (minCenter > maxCenter){
+            center = mid;
+          } else {
+            center = Math.min(maxCenter, Math.max(minCenter, center));
+          }
+          const nextOffset = center - mid;
+          CHART_PAN.set(metric.key, nextOffset);
+          return nextOffset;
+        };
+        const setZoom = (value) => {
+          const clamped = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, value));
+          CHART_ZOOM.set(metric.key, clamped);
+          setPan(CHART_PAN.get(metric.key) ?? 0, clamped);
+          renderChart();
+        };
+        const getPan = () => CHART_PAN.get(metric.key) ?? 0;
+
+        const renderChart = () => {
+          chartWindow.innerHTML = '';
+          const svg = makeChartSvg(dataRows, metric, getZoom(), getPan());
+          chartWindow.appendChild(svg);
+        };
+
+        attachChartInteractions(chartWindow, dataRows, metric, getZoom, setZoom, getPan, setPan);
+
+        setZoom(getZoom());
       }
 
       container.appendChild(section);
@@ -1622,11 +1725,10 @@ const METRICS = [
     return fromData * 1.10;
   }
 
-  function makeChartSvg(rows, metric){
+  function getChartLayout(){
     const isMobile = window.innerWidth <= 720;
     const W = 980;
     const H = isMobile ? 300 : 260;
-
     const margin = isMobile
       ? { top: 38, right: 170, bottom: 56, left: 72 }
       : { top: 34, right: 170, bottom: 44, left: 64 };
@@ -1639,6 +1741,11 @@ const METRICS = [
       tick: isMobile ? 12 : 11,
       pointLabel: isMobile ? 13 : 12
     };
+    return { isMobile, W, H, margin, plotW, plotH, fontSizes };
+  }
+
+  function makeChartSvg(rows, metric, zoomFactor = ZOOM_SETTINGS.default, panOffset = 0){
+    const { isMobile, W, H, margin, plotW, plotH, fontSizes } = getChartLayout();
 
     const values = rows.map(r => r[metric.key]).filter(v => v != null);
     const hasData = values.length > 0;
@@ -1646,10 +1753,22 @@ const METRICS = [
     const minT = rows[0].Date.getTime();
     const maxT = rows[rows.length-1].Date.getTime();
     const spanT = Math.max(1, maxT - minT);
-    const padT = spanT * 0.10;
+    const zoom = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, zoomFactor || 1));
+    const windowSpan = spanT / zoom;
+    const midT = (minT + maxT) / 2;
+    const half = windowSpan / 2;
+    const minCenter = minT + half;
+    const maxCenter = maxT - half;
+    let centerT = midT + (panOffset || 0);
+    if (minCenter > maxCenter){
+      centerT = midT;
+    } else {
+      centerT = Math.min(maxCenter, Math.max(minCenter, centerT));
+    }
+    const padT = windowSpan * 0.08;
 
-    const xMin = minT - padT;
-    const xMax = maxT + padT;
+    const xMin = centerT - (windowSpan / 2) - padT;
+    const xMax = centerT + (windowSpan / 2) + padT;
 
     const maxV = hasData ? Math.max(...values) : 1;
     const activeRanges = metric._resolvedRanges || metric.ranges;
@@ -1667,6 +1786,12 @@ const METRICS = [
 
     const defs = elNS('defs');
     svg.appendChild(defs);
+
+    const clipId = `clip-${metric.key.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
+    const clipPath = elNS('clipPath');
+    clipPath.setAttribute('id', clipId);
+    clipPath.appendChild(rect(margin.left, margin.top, plotW, plotH, 'transparent'));
+    defs.appendChild(clipPath);
 
     // Background
     svg.appendChild(rect(0,0,W,H,'rgba(255,255,255,0.015)'));
@@ -1746,6 +1871,8 @@ const METRICS = [
 
     // Line
     if (pts.length >= 1){
+      const seriesGroup = elNS('g');
+      seriesGroup.setAttribute('clip-path', `url(#${clipId})`);
       const path = pts.map((p, i) => `${i===0 ? 'M' : 'L'} ${x(p.d).toFixed(2)} ${y(p.v).toFixed(2)}`).join(' ');
       const pEl = elNS('path');
       pEl.setAttribute('d', path);
@@ -1753,14 +1880,14 @@ const METRICS = [
       pEl.setAttribute('stroke', '#1f2a44');
       pEl.setAttribute('stroke-width', '4');
       pEl.setAttribute('opacity', '0.55');
-      svg.appendChild(pEl);
+      seriesGroup.appendChild(pEl);
 
       const pEl2 = elNS('path');
       pEl2.setAttribute('d', path);
       pEl2.setAttribute('fill', 'none');
       pEl2.setAttribute('stroke', '#4b5563');
       pEl2.setAttribute('stroke-width', '2.5');
-      svg.appendChild(pEl2);
+      seriesGroup.appendChild(pEl2);
 
       // Points + labels
       for (const p of pts){
@@ -1772,7 +1899,7 @@ const METRICS = [
         point.dataset.date = p.rawDate || '';
         point.dataset.dateFormatted = formatFullDate(p.rawDate, p.d);
         point.dataset.metric = metric.key;
-        svg.appendChild(point);
+        seriesGroup.appendChild(point);
         attachTooltipHandlers(svg, point, metric);
 
         const label = formatValue(p.v, metric.key);
@@ -1787,17 +1914,121 @@ const METRICS = [
         const bx = cx - boxW/2;
         const by = cy - 22 - boxH/2;
 
-        svg.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
-        svg.appendChild(textEl(label, cx, by + boxH/2 + 4, {
+        seriesGroup.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
+        seriesGroup.appendChild(textEl(label, cx, by + boxH/2 + 4, {
           size: textSize,
           weight: 900,
           fill: '#1f2a44',
           anchor: 'middle'
         }));
       }
+      svg.appendChild(seriesGroup);
     }
 
     return svg;
+  }
+
+  function attachChartInteractions(chartWindow, rows, metric, getZoom, setZoom, getPan, setPan){
+    const pointers = new Map();
+    let isPanning = false;
+    let panStartX = 0;
+    let panStartOffset = 0;
+    let pinchStartDistance = 0;
+    let pinchStartZoom = 1;
+    let pinchStartOffset = 0;
+    let pinchStartMidX = 0;
+
+    const getSpanT = () => {
+      const minT = rows[0].Date.getTime();
+      const maxT = rows[rows.length-1].Date.getTime();
+      return { minT, maxT, spanT: Math.max(1, maxT - minT) };
+    };
+
+    const getPlotW = () => getChartLayout().plotW;
+
+    const updatePanFromDelta = (deltaX, zoomValue, baseOffset) => {
+      const { spanT } = getSpanT();
+      const plotW = getPlotW();
+      const windowSpan = spanT / zoomValue;
+      const deltaT = (-deltaX / plotW) * windowSpan;
+      setPan(baseOffset + deltaT, zoomValue);
+      setZoom(zoomValue);
+    };
+
+    const updatePinchZoom = () => {
+      if (pointers.size < 2) return;
+      const pts = Array.from(pointers.values());
+      const [p1, p2] = pts;
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      const dist = Math.hypot(dx, dy);
+      if (!pinchStartDistance) return;
+      const ratio = dist / pinchStartDistance;
+      const nextZoom = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, pinchStartZoom * ratio));
+      const midX = (p1.x + p2.x) / 2;
+      const deltaMidX = midX - pinchStartMidX;
+      const { spanT } = getSpanT();
+      const plotW = getPlotW();
+      const windowSpan = spanT / nextZoom;
+      const deltaT = (-deltaMidX / plotW) * windowSpan;
+      setPan(pinchStartOffset + deltaT, nextZoom);
+      setZoom(nextZoom);
+    };
+
+    const onPointerDown = (event) => {
+      chartWindow.setPointerCapture(event.pointerId);
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+      if (pointers.size === 1){
+        isPanning = true;
+        panStartX = event.clientX;
+        panStartOffset = getPan();
+        chartWindow.classList.add('isPanning');
+      }
+
+      if (pointers.size === 2){
+        isPanning = false;
+        const pts = Array.from(pointers.values());
+        const [p1, p2] = pts;
+        pinchStartDistance = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        pinchStartZoom = getZoom();
+        pinchStartOffset = getPan();
+        pinchStartMidX = (p1.x + p2.x) / 2;
+      }
+    };
+
+    const onPointerMove = (event) => {
+      if (!pointers.has(event.pointerId)) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+      if (pointers.size === 1 && isPanning){
+        const zoomValue = getZoom();
+        if (zoomValue <= 1.01) return;
+        const deltaX = event.clientX - panStartX;
+        updatePanFromDelta(deltaX, zoomValue, panStartOffset);
+      }
+
+      if (pointers.size === 2){
+        updatePinchZoom();
+      }
+    };
+
+    const onPointerUp = (event) => {
+      pointers.delete(event.pointerId);
+      if (pointers.size < 2){
+        pinchStartDistance = 0;
+      }
+      if (pointers.size === 0){
+        isPanning = false;
+        chartWindow.classList.remove('isPanning');
+      }
+    };
+
+    chartWindow.addEventListener('pointerdown', onPointerDown);
+    chartWindow.addEventListener('pointermove', onPointerMove);
+    chartWindow.addEventListener('pointerup', onPointerUp);
+    chartWindow.addEventListener('pointercancel', onPointerUp);
+    chartWindow.addEventListener('pointerleave', onPointerUp);
   }
 
   function makeTimeTicks(minT, maxT, count){
