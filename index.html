@@ -243,6 +243,52 @@
       letter-spacing: .2px;
     }
 
+    .chartBlock{
+      padding: 2px 6px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chartZoom{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chartZoomControls{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1 1 auto;
+      max-width: 320px;
+    }
+
+    .chartZoom input[type="range"]{
+      flex: 1 1 auto;
+      accent-color: #6366f1;
+    }
+
+    .chartZoomValue{
+      min-width: 44px;
+      text-align: right;
+      color: #1f2a44;
+      font-weight: 900;
+    }
+
+    .chartWindow{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.8);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+    }
+
     .sectionTitle{
       margin: 18px 0 2px;
       padding: 0 10px;
@@ -1056,6 +1102,7 @@ const METRICS = [
   const setupSteps = 5;
   const selectedMetrics = new Set();
   let templateMode = 'download';
+  const chartZoom = new Map();
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -1091,6 +1138,10 @@ const METRICS = [
   });
 
   btnNextSetup.addEventListener('click', () => {
+    if (setupStep === setupSteps - 1){
+      setupModal.classList.remove('show');
+      return;
+    }
     setupStep = Math.min(setupStep + 1, setupSteps - 1);
     updateSetupStep();
   });
@@ -1588,8 +1639,51 @@ const METRICS = [
         } else {
           metric._resolvedRanges = metric.ranges;
         }
-        const svg = makeChartSvg(dataRows, metric);
-        section.appendChild(svg);
+        const zoomFactor = chartZoom.get(metric.key) ?? 1;
+        const chartBlock = document.createElement('div');
+        chartBlock.className = 'chartBlock';
+
+        const zoomRow = document.createElement('div');
+        zoomRow.className = 'chartZoom';
+        const zoomLabel = document.createElement('div');
+        zoomLabel.textContent = 'Zoom timeline';
+        const zoomControls = document.createElement('div');
+        zoomControls.className = 'chartZoomControls';
+        const zoomInput = document.createElement('input');
+        zoomInput.type = 'range';
+        zoomInput.min = '0.6';
+        zoomInput.max = '3';
+        zoomInput.step = '0.1';
+        zoomInput.value = String(zoomFactor);
+        const zoomValue = document.createElement('div');
+        zoomValue.className = 'chartZoomValue';
+        zoomValue.textContent = `${zoomFactor.toFixed(1)}x`;
+
+        zoomInput.addEventListener('input', () => {
+          const nextZoom = Number(zoomInput.value);
+          chartZoom.set(metric.key, nextZoom);
+          zoomValue.textContent = `${nextZoom.toFixed(1)}x`;
+        });
+
+        zoomInput.addEventListener('change', () => {
+          const nextZoom = Number(zoomInput.value);
+          chartZoom.set(metric.key, nextZoom);
+          renderAll(dataRows, availableMetrics);
+        });
+
+        zoomControls.appendChild(zoomInput);
+        zoomControls.appendChild(zoomValue);
+        zoomRow.appendChild(zoomLabel);
+        zoomRow.appendChild(zoomControls);
+
+        const chartWindow = document.createElement('div');
+        chartWindow.className = 'chartWindow';
+        const svg = makeChartSvg(dataRows, metric, zoomFactor);
+        chartWindow.appendChild(svg);
+
+        chartBlock.appendChild(zoomRow);
+        chartBlock.appendChild(chartWindow);
+        section.appendChild(chartBlock);
       }
 
       container.appendChild(section);
@@ -1622,7 +1716,7 @@ const METRICS = [
     return fromData * 1.10;
   }
 
-  function makeChartSvg(rows, metric){
+  function makeChartSvg(rows, metric, zoomFactor = 1){
     const isMobile = window.innerWidth <= 720;
     const W = 980;
     const H = isMobile ? 300 : 260;
@@ -1648,8 +1742,13 @@ const METRICS = [
     const spanT = Math.max(1, maxT - minT);
     const padT = spanT * 0.10;
 
-    const xMin = minT - padT;
-    const xMax = maxT + padT;
+    const baseMin = minT - padT;
+    const baseMax = maxT + padT;
+    const baseSpan = baseMax - baseMin;
+    const zoomSpan = baseSpan / Math.max(0.4, zoomFactor);
+    const mid = (baseMin + baseMax) / 2;
+    const xMin = mid - zoomSpan / 2;
+    const xMax = mid + zoomSpan / 2;
 
     const maxV = hasData ? Math.max(...values) : 1;
     const activeRanges = metric._resolvedRanges || metric.ranges;
