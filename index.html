@@ -243,6 +243,64 @@
       letter-spacing: .2px;
     }
 
+    .chartShell{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 4px 12px;
+    }
+
+    .chartZoom{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 10px;
+      flex-wrap: wrap;
+    }
+
+    .chartZoomLabel{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .chartZoomControls{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .zoomButton{
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      min-width: 34px;
+    }
+
+    .zoomValue{
+      font-size: 12px;
+      color: #1f2a44;
+      font-weight: 800;
+      min-width: 48px;
+      text-align: center;
+    }
+
+    .zoomRange{
+      width: 140px;
+      accent-color: #6366f1;
+    }
+
+    .chartWindow{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.65);
+      padding: 6px;
+      overflow: hidden;
+    }
+
     .sectionTitle{
       margin: 18px 0 2px;
       padding: 0 10px;
@@ -903,6 +961,13 @@
   };
 
   let CURRENT_SEX = (localStorage.getItem('chartSex') || 'male');
+  const CHART_ZOOM = new Map();
+  const ZOOM_SETTINGS = {
+    min: 0.6,
+    max: 3,
+    step: 0.2,
+    default: 1
+  };
 
 const METRICS = [
     // ---------------- Cardiometabolic ----------------
@@ -1091,6 +1156,10 @@ const METRICS = [
   });
 
   btnNextSetup.addEventListener('click', () => {
+    if (setupStep === setupSteps - 1){
+      setupModal.classList.remove('show');
+      return;
+    }
     setupStep = Math.min(setupStep + 1, setupSteps - 1);
     updateSetupStep();
   });
@@ -1588,8 +1657,85 @@ const METRICS = [
         } else {
           metric._resolvedRanges = metric.ranges;
         }
-        const svg = makeChartSvg(dataRows, metric);
-        section.appendChild(svg);
+
+        const chartShell = document.createElement('div');
+        chartShell.className = 'chartShell';
+
+        const zoomBar = document.createElement('div');
+        zoomBar.className = 'chartZoom';
+
+        const zoomLabel = document.createElement('div');
+        zoomLabel.className = 'chartZoomLabel';
+        zoomLabel.textContent = 'Timeline zoom';
+
+        const zoomControls = document.createElement('div');
+        zoomControls.className = 'chartZoomControls';
+
+        const zoomOut = document.createElement('button');
+        zoomOut.type = 'button';
+        zoomOut.className = 'zoomButton';
+        zoomOut.textContent = '−';
+        zoomOut.setAttribute('aria-label', 'Zoom out');
+
+        const zoomIn = document.createElement('button');
+        zoomIn.type = 'button';
+        zoomIn.className = 'zoomButton';
+        zoomIn.textContent = '+';
+        zoomIn.setAttribute('aria-label', 'Zoom in');
+
+        const zoomValue = document.createElement('div');
+        zoomValue.className = 'zoomValue';
+
+        const zoomRange = document.createElement('input');
+        zoomRange.type = 'range';
+        zoomRange.className = 'zoomRange';
+        zoomRange.min = String(ZOOM_SETTINGS.min);
+        zoomRange.max = String(ZOOM_SETTINGS.max);
+        zoomRange.step = String(ZOOM_SETTINGS.step);
+
+        const chartWindow = document.createElement('div');
+        chartWindow.className = 'chartWindow';
+
+        zoomControls.appendChild(zoomOut);
+        zoomControls.appendChild(zoomRange);
+        zoomControls.appendChild(zoomIn);
+        zoomControls.appendChild(zoomValue);
+
+        zoomBar.appendChild(zoomLabel);
+        zoomBar.appendChild(zoomControls);
+
+        chartShell.appendChild(zoomBar);
+        chartShell.appendChild(chartWindow);
+        section.appendChild(chartShell);
+
+        const getZoom = () => CHART_ZOOM.get(metric.key) ?? ZOOM_SETTINGS.default;
+        const setZoom = (value) => {
+          const clamped = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, value));
+          CHART_ZOOM.set(metric.key, clamped);
+          zoomRange.value = String(clamped);
+          zoomValue.textContent = `${clamped.toFixed(1)}×`;
+          renderChart();
+        };
+
+        const renderChart = () => {
+          chartWindow.innerHTML = '';
+          const svg = makeChartSvg(dataRows, metric, getZoom());
+          chartWindow.appendChild(svg);
+        };
+
+        zoomOut.addEventListener('click', () => {
+          setZoom(getZoom() - ZOOM_SETTINGS.step);
+        });
+
+        zoomIn.addEventListener('click', () => {
+          setZoom(getZoom() + ZOOM_SETTINGS.step);
+        });
+
+        zoomRange.addEventListener('input', () => {
+          setZoom(Number(zoomRange.value));
+        });
+
+        setZoom(getZoom());
       }
 
       container.appendChild(section);
@@ -1622,7 +1768,7 @@ const METRICS = [
     return fromData * 1.10;
   }
 
-  function makeChartSvg(rows, metric){
+  function makeChartSvg(rows, metric, zoomFactor = ZOOM_SETTINGS.default){
     const isMobile = window.innerWidth <= 720;
     const W = 980;
     const H = isMobile ? 300 : 260;
@@ -1646,10 +1792,13 @@ const METRICS = [
     const minT = rows[0].Date.getTime();
     const maxT = rows[rows.length-1].Date.getTime();
     const spanT = Math.max(1, maxT - minT);
-    const padT = spanT * 0.10;
+    const zoom = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, zoomFactor || 1));
+    const windowSpan = spanT / zoom;
+    const centerT = (minT + maxT) / 2;
+    const padT = windowSpan * 0.08;
 
-    const xMin = minT - padT;
-    const xMax = maxT + padT;
+    const xMin = centerT - (windowSpan / 2) - padT;
+    const xMax = centerT + (windowSpan / 2) + padT;
 
     const maxV = hasData ? Math.max(...values) : 1;
     const activeRanges = metric._resolvedRanges || metric.ranges;
@@ -1667,6 +1816,12 @@ const METRICS = [
 
     const defs = elNS('defs');
     svg.appendChild(defs);
+
+    const clipId = `clip-${metric.key.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
+    const clipPath = elNS('clipPath');
+    clipPath.setAttribute('id', clipId);
+    clipPath.appendChild(rect(margin.left, margin.top, plotW, plotH, 'transparent'));
+    defs.appendChild(clipPath);
 
     // Background
     svg.appendChild(rect(0,0,W,H,'rgba(255,255,255,0.015)'));
@@ -1746,6 +1901,8 @@ const METRICS = [
 
     // Line
     if (pts.length >= 1){
+      const seriesGroup = elNS('g');
+      seriesGroup.setAttribute('clip-path', `url(#${clipId})`);
       const path = pts.map((p, i) => `${i===0 ? 'M' : 'L'} ${x(p.d).toFixed(2)} ${y(p.v).toFixed(2)}`).join(' ');
       const pEl = elNS('path');
       pEl.setAttribute('d', path);
@@ -1753,14 +1910,14 @@ const METRICS = [
       pEl.setAttribute('stroke', '#1f2a44');
       pEl.setAttribute('stroke-width', '4');
       pEl.setAttribute('opacity', '0.55');
-      svg.appendChild(pEl);
+      seriesGroup.appendChild(pEl);
 
       const pEl2 = elNS('path');
       pEl2.setAttribute('d', path);
       pEl2.setAttribute('fill', 'none');
       pEl2.setAttribute('stroke', '#4b5563');
       pEl2.setAttribute('stroke-width', '2.5');
-      svg.appendChild(pEl2);
+      seriesGroup.appendChild(pEl2);
 
       // Points + labels
       for (const p of pts){
@@ -1772,7 +1929,7 @@ const METRICS = [
         point.dataset.date = p.rawDate || '';
         point.dataset.dateFormatted = formatFullDate(p.rawDate, p.d);
         point.dataset.metric = metric.key;
-        svg.appendChild(point);
+        seriesGroup.appendChild(point);
         attachTooltipHandlers(svg, point, metric);
 
         const label = formatValue(p.v, metric.key);
@@ -1787,14 +1944,15 @@ const METRICS = [
         const bx = cx - boxW/2;
         const by = cy - 22 - boxH/2;
 
-        svg.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
-        svg.appendChild(textEl(label, cx, by + boxH/2 + 4, {
+        seriesGroup.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
+        seriesGroup.appendChild(textEl(label, cx, by + boxH/2 + 4, {
           size: textSize,
           weight: 900,
           fill: '#1f2a44',
           anchor: 'middle'
         }));
       }
+      svg.appendChild(seriesGroup);
     }
 
     return svg;
