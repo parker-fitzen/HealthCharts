@@ -243,6 +243,60 @@
       letter-spacing: .2px;
     }
 
+    .chartToolbar{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px 6px;
+    }
+
+    .zoomControls{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+    }
+
+    .zoomLabel{
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .zoomValue{
+      font-size: 12px;
+      font-weight: 900;
+      color: #1f2a44;
+      min-width: 48px;
+      text-align: right;
+    }
+
+    .zoomSlider{
+      width: 140px;
+    }
+
+    .zoomButton{
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .chartWindow{
+      margin: 0 10px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,0.45);
+      background: radial-gradient(120% 140% at 10% 0%, rgba(255,255,255,0.9), rgba(248,250,255,0.82));
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7);
+    }
+
     .sectionTitle{
       margin: 18px 0 2px;
       padding: 0 10px;
@@ -827,6 +881,9 @@
       .sexToggle{ width: 100%; }
       .chartTooltip{ font-size: 13px; }
       .chartTooltip .label{ font-size: 12px; }
+      .chartToolbar{ flex-direction: column; align-items: stretch; }
+      .zoomControls{ width: 100%; justify-content: space-between; }
+      .zoomSlider{ flex: 1 1 auto; width: 100%; }
     }
 
     svg text{ font-family: inherit; }
@@ -1056,6 +1113,7 @@ const METRICS = [
   const setupSteps = 5;
   const selectedMetrics = new Set();
   let templateMode = 'download';
+  const chartZoomLevels = new Map();
 
   elFile.addEventListener('change', async (e) => {
     const f = e.target.files?.[0];
@@ -1091,6 +1149,12 @@ const METRICS = [
   });
 
   btnNextSetup.addEventListener('click', () => {
+    if (setupStep === setupSteps - 1){
+      setupModal.classList.remove('show');
+      setupStep = 0;
+      updateSetupStep();
+      return;
+    }
     setupStep = Math.min(setupStep + 1, setupSteps - 1);
     updateSetupStep();
   });
@@ -1588,8 +1652,78 @@ const METRICS = [
         } else {
           metric._resolvedRanges = metric.ranges;
         }
-        const svg = makeChartSvg(dataRows, metric);
-        section.appendChild(svg);
+        const zoomLevel = getChartZoom(metric.key);
+        const chartShell = document.createElement('div');
+        chartShell.className = 'chartWindow';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'chartToolbar';
+        toolbar.innerHTML = `
+          <div style="font-weight:900; color:#1f2a44;">${escapeHtml(metric.title)}</div>
+        `;
+
+        const zoomControls = document.createElement('div');
+        zoomControls.className = 'zoomControls';
+
+        const zoomLabel = document.createElement('span');
+        zoomLabel.className = 'zoomLabel';
+        zoomLabel.textContent = 'Zoom';
+
+        const zoomOut = document.createElement('button');
+        zoomOut.type = 'button';
+        zoomOut.className = 'zoomButton ghostButton';
+        zoomOut.textContent = '−';
+
+        const zoomSlider = document.createElement('input');
+        zoomSlider.type = 'range';
+        zoomSlider.min = '0.5';
+        zoomSlider.max = '3';
+        zoomSlider.step = '0.1';
+        zoomSlider.value = String(zoomLevel);
+        zoomSlider.className = 'zoomSlider';
+        zoomSlider.setAttribute('aria-label', `${metric.title} zoom`);
+
+        const zoomIn = document.createElement('button');
+        zoomIn.type = 'button';
+        zoomIn.className = 'zoomButton';
+        zoomIn.textContent = '+';
+
+        const zoomValue = document.createElement('span');
+        zoomValue.className = 'zoomValue';
+        zoomValue.textContent = `${zoomLevel.toFixed(1)}×`;
+
+        zoomControls.appendChild(zoomLabel);
+        zoomControls.appendChild(zoomOut);
+        zoomControls.appendChild(zoomSlider);
+        zoomControls.appendChild(zoomIn);
+        zoomControls.appendChild(zoomValue);
+        toolbar.appendChild(zoomControls);
+
+        const svg = makeChartSvg(dataRows, metric, zoomLevel);
+
+        function updateZoom(nextZoom){
+          const clamped = Math.min(3, Math.max(0.5, Number(nextZoom)));
+          chartZoomLevels.set(metric.key, clamped);
+          renderAll(dataRows, availableMetrics);
+        }
+
+        zoomSlider.addEventListener('input', (event) => {
+          updateZoom(event.target.value);
+        });
+
+        zoomOut.addEventListener('click', () => {
+          const current = Number(zoomSlider.value);
+          updateZoom(current - 0.2);
+        });
+
+        zoomIn.addEventListener('click', () => {
+          const current = Number(zoomSlider.value);
+          updateZoom(current + 0.2);
+        });
+
+        chartShell.appendChild(toolbar);
+        chartShell.appendChild(svg);
+        section.appendChild(chartShell);
       }
 
       container.appendChild(section);
@@ -1622,7 +1756,7 @@ const METRICS = [
     return fromData * 1.10;
   }
 
-  function makeChartSvg(rows, metric){
+  function makeChartSvg(rows, metric, zoomLevel = 1){
     const isMobile = window.innerWidth <= 720;
     const W = 980;
     const H = isMobile ? 300 : 260;
@@ -1647,9 +1781,12 @@ const METRICS = [
     const maxT = rows[rows.length-1].Date.getTime();
     const spanT = Math.max(1, maxT - minT);
     const padT = spanT * 0.10;
+    const baseSpan = spanT + padT * 2;
+    const zoomSpan = baseSpan / zoomLevel;
+    const midT = (minT + maxT) / 2;
 
-    const xMin = minT - padT;
-    const xMax = maxT + padT;
+    const xMin = midT - zoomSpan / 2;
+    const xMax = midT + zoomSpan / 2;
 
     const maxV = hasData ? Math.max(...values) : 1;
     const activeRanges = metric._resolvedRanges || metric.ranges;
@@ -1672,12 +1809,6 @@ const METRICS = [
     svg.appendChild(rect(0,0,W,H,'rgba(255,255,255,0.015)'));
 
     // Title
-    svg.appendChild(textEl(metric.title, margin.left, 18, {
-      size: fontSizes.title,
-      weight: 900,
-      fill: '#1f2a44'
-    }));
-
     // Y-axis label
     svg.appendChild(textEl(metric.unit, 14, margin.top + plotH/2, {
       size: fontSizes.axis,
@@ -1798,6 +1929,10 @@ const METRICS = [
     }
 
     return svg;
+  }
+
+  function getChartZoom(metricKey){
+    return chartZoomLevels.get(metricKey) ?? 1;
   }
 
   function makeTimeTicks(minT, maxT, count){
