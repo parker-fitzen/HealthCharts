@@ -250,21 +250,6 @@
       padding: 8px 4px 12px;
     }
 
-    .chartZoomHint{
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 0 10px;
-      flex-wrap: wrap;
-    }
-
-    .chartZoomLabel{
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
     .chartWindow{
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -1640,18 +1625,9 @@ const METRICS = [
         const chartShell = document.createElement('div');
         chartShell.className = 'chartShell';
 
-        const zoomHint = document.createElement('div');
-        zoomHint.className = 'chartZoomHint';
-
-        const zoomLabel = document.createElement('div');
-        zoomLabel.className = 'chartZoomLabel';
-        zoomLabel.textContent = 'Pinch to zoom, drag to pan';
-
         const chartWindow = document.createElement('div');
         chartWindow.className = 'chartWindow';
 
-        zoomHint.appendChild(zoomLabel);
-        chartShell.appendChild(zoomHint);
         chartShell.appendChild(chartWindow);
         section.appendChild(chartShell);
 
@@ -1944,7 +1920,14 @@ const METRICS = [
       return { minT, maxT, spanT: Math.max(1, maxT - minT) };
     };
 
-    const getPlotW = () => getChartLayout().plotW;
+    const getPlotW = () => {
+      const svg = chartWindow.querySelector('svg');
+      const layout = getChartLayout();
+      if (!svg) return layout.plotW;
+      const rect = svg.getBoundingClientRect();
+      if (!rect.width) return layout.plotW;
+      return rect.width * (layout.plotW / layout.W);
+    };
 
     const updatePanFromDelta = (deltaX, zoomValue, baseOffset) => {
       const { spanT } = getSpanT();
