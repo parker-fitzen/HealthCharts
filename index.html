@@ -243,6 +243,27 @@
       letter-spacing: .2px;
     }
 
+    .chartShell{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 4px 12px;
+    }
+
+    .chartWindow{
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.65);
+      padding: 6px;
+      overflow: hidden;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .chartWindow.grabbing{
+      cursor: grabbing;
+    }
+
     .sectionTitle{
       margin: 18px 0 2px;
       padding: 0 10px;
@@ -903,6 +924,13 @@
   };
 
   let CURRENT_SEX = (localStorage.getItem('chartSex') || 'male');
+  const CHART_STATE = new Map();
+  const ZOOM_SETTINGS = {
+    min: 0.6,
+    max: 3,
+    step: 0.2,
+    default: 1
+  };
 
 const METRICS = [
     // ---------------- Cardiometabolic ----------------
@@ -1091,6 +1119,10 @@ const METRICS = [
   });
 
   btnNextSetup.addEventListener('click', () => {
+    if (setupStep === setupSteps - 1){
+      setupModal.classList.remove('show');
+      return;
+    }
     setupStep = Math.min(setupStep + 1, setupSteps - 1);
     updateSetupStep();
   });
@@ -1588,8 +1620,137 @@ const METRICS = [
         } else {
           metric._resolvedRanges = metric.ranges;
         }
-        const svg = makeChartSvg(dataRows, metric);
-        section.appendChild(svg);
+
+        const chartShell = document.createElement('div');
+        chartShell.className = 'chartShell';
+
+        const chartWindow = document.createElement('div');
+        chartWindow.className = 'chartWindow';
+        chartWindow.setAttribute('aria-label', `${metric.title} chart`);
+
+        chartShell.appendChild(chartWindow);
+        section.appendChild(chartShell);
+
+        const getState = () => {
+          if (!CHART_STATE.has(metric.key)){
+            const minT = dataRows[0].Date.getTime();
+            const maxT = dataRows[dataRows.length - 1].Date.getTime();
+            CHART_STATE.set(metric.key, {
+              zoom: ZOOM_SETTINGS.default,
+              centerT: (minT + maxT) / 2
+            });
+          }
+          return CHART_STATE.get(metric.key);
+        };
+
+        let latestMeta = null;
+
+        const setZoom = (value) => {
+          const state = getState();
+          state.zoom = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, value));
+          renderChart();
+        };
+
+        const setCenter = (value) => {
+          const state = getState();
+          const minT = dataRows[0].Date.getTime();
+          const maxT = dataRows[dataRows.length - 1].Date.getTime();
+          state.centerT = Math.min(maxT, Math.max(minT, value));
+          renderChart();
+        };
+
+        const renderChart = () => {
+          const state = getState();
+          latestMeta = getChartMeta(dataRows, state.zoom, state.centerT);
+          chartWindow.innerHTML = '';
+          const svg = makeChartSvg(dataRows, metric, state.zoom, state.centerT);
+          chartWindow.appendChild(svg);
+        };
+
+        let isPanning = false;
+        let panStartX = 0;
+        let panStartCenter = 0;
+
+        const startPan = (clientX) => {
+          const state = getState();
+          if (state.zoom <= 1) return;
+          isPanning = true;
+          panStartX = clientX;
+          panStartCenter = state.centerT;
+          chartWindow.classList.add('grabbing');
+        };
+
+        const updatePan = (clientX) => {
+          if (!isPanning || !latestMeta) return;
+          const deltaX = clientX - panStartX;
+          const span = latestMeta.xMax - latestMeta.xMin;
+          const deltaTime = -(deltaX / latestMeta.plotW) * span;
+          setCenter(panStartCenter + deltaTime);
+        };
+
+        const endPan = () => {
+          if (!isPanning) return;
+          isPanning = false;
+          chartWindow.classList.remove('grabbing');
+        };
+
+        chartWindow.addEventListener('mousedown', (event) => {
+          event.preventDefault();
+          startPan(event.clientX);
+        });
+
+        window.addEventListener('mousemove', (event) => {
+          updatePan(event.clientX);
+        });
+
+        window.addEventListener('mouseup', endPan);
+
+        let touchMode = null;
+        let pinchStartDist = 0;
+        let pinchStartZoom = 1;
+
+        chartWindow.addEventListener('touchstart', (event) => {
+          if (event.touches.length === 2){
+            event.preventDefault();
+            touchMode = 'pinch';
+            const dx = event.touches[0].clientX - event.touches[1].clientX;
+            const dy = event.touches[0].clientY - event.touches[1].clientY;
+            pinchStartDist = Math.hypot(dx, dy);
+            pinchStartZoom = getState().zoom;
+          } else if (event.touches.length === 1){
+            event.preventDefault();
+            touchMode = 'pan';
+            startPan(event.touches[0].clientX);
+          }
+        }, { passive: false });
+
+        chartWindow.addEventListener('touchmove', (event) => {
+          if (touchMode === 'pinch' && event.touches.length === 2){
+            event.preventDefault();
+            const dx = event.touches[0].clientX - event.touches[1].clientX;
+            const dy = event.touches[0].clientY - event.touches[1].clientY;
+            const dist = Math.hypot(dx, dy);
+            if (pinchStartDist > 0){
+              const nextZoom = pinchStartZoom * (dist / pinchStartDist);
+              setZoom(nextZoom);
+            }
+          } else if (touchMode === 'pan' && event.touches.length === 1){
+            event.preventDefault();
+            updatePan(event.touches[0].clientX);
+          }
+        }, { passive: false });
+
+        chartWindow.addEventListener('touchend', () => {
+          touchMode = null;
+          endPan();
+        });
+
+        chartWindow.addEventListener('touchcancel', () => {
+          touchMode = null;
+          endPan();
+        });
+
+        renderChart();
       }
 
       container.appendChild(section);
@@ -1622,7 +1783,7 @@ const METRICS = [
     return fromData * 1.10;
   }
 
-  function makeChartSvg(rows, metric){
+  function getChartMeta(rows, zoomFactor = ZOOM_SETTINGS.default, centerOverride){
     const isMobile = window.innerWidth <= 720;
     const W = 980;
     const H = isMobile ? 300 : 260;
@@ -1640,16 +1801,52 @@ const METRICS = [
       pointLabel: isMobile ? 13 : 12
     };
 
-    const values = rows.map(r => r[metric.key]).filter(v => v != null);
-    const hasData = values.length > 0;
-
     const minT = rows[0].Date.getTime();
     const maxT = rows[rows.length-1].Date.getTime();
     const spanT = Math.max(1, maxT - minT);
-    const padT = spanT * 0.10;
+    const zoom = Math.min(ZOOM_SETTINGS.max, Math.max(ZOOM_SETTINGS.min, zoomFactor || 1));
+    const windowSpan = spanT / zoom;
+    const centerT = Math.min(maxT, Math.max(minT, centerOverride ?? (minT + maxT) / 2));
+    const padT = windowSpan * 0.08;
 
-    const xMin = minT - padT;
-    const xMax = maxT + padT;
+    const xMin = centerT - (windowSpan / 2) - padT;
+    const xMax = centerT + (windowSpan / 2) + padT;
+
+    return {
+      isMobile,
+      W,
+      H,
+      margin,
+      plotW,
+      plotH,
+      fontSizes,
+      minT,
+      maxT,
+      spanT,
+      zoom,
+      windowSpan,
+      centerT,
+      xMin,
+      xMax
+    };
+  }
+
+  function makeChartSvg(rows, metric, zoomFactor = ZOOM_SETTINGS.default, centerOverride){
+    const meta = getChartMeta(rows, zoomFactor, centerOverride);
+    const {
+      isMobile,
+      W,
+      H,
+      margin,
+      plotW,
+      plotH,
+      fontSizes,
+      xMin,
+      xMax
+    } = meta;
+
+    const values = rows.map(r => r[metric.key]).filter(v => v != null);
+    const hasData = values.length > 0;
 
     const maxV = hasData ? Math.max(...values) : 1;
     const activeRanges = metric._resolvedRanges || metric.ranges;
@@ -1667,6 +1864,12 @@ const METRICS = [
 
     const defs = elNS('defs');
     svg.appendChild(defs);
+
+    const clipId = `clip-${metric.key.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
+    const clipPath = elNS('clipPath');
+    clipPath.setAttribute('id', clipId);
+    clipPath.appendChild(rect(margin.left, margin.top, plotW, plotH, 'transparent'));
+    defs.appendChild(clipPath);
 
     // Background
     svg.appendChild(rect(0,0,W,H,'rgba(255,255,255,0.015)'));
@@ -1746,6 +1949,8 @@ const METRICS = [
 
     // Line
     if (pts.length >= 1){
+      const seriesGroup = elNS('g');
+      seriesGroup.setAttribute('clip-path', `url(#${clipId})`);
       const path = pts.map((p, i) => `${i===0 ? 'M' : 'L'} ${x(p.d).toFixed(2)} ${y(p.v).toFixed(2)}`).join(' ');
       const pEl = elNS('path');
       pEl.setAttribute('d', path);
@@ -1753,14 +1958,14 @@ const METRICS = [
       pEl.setAttribute('stroke', '#1f2a44');
       pEl.setAttribute('stroke-width', '4');
       pEl.setAttribute('opacity', '0.55');
-      svg.appendChild(pEl);
+      seriesGroup.appendChild(pEl);
 
       const pEl2 = elNS('path');
       pEl2.setAttribute('d', path);
       pEl2.setAttribute('fill', 'none');
       pEl2.setAttribute('stroke', '#4b5563');
       pEl2.setAttribute('stroke-width', '2.5');
-      svg.appendChild(pEl2);
+      seriesGroup.appendChild(pEl2);
 
       // Points + labels
       for (const p of pts){
@@ -1772,7 +1977,7 @@ const METRICS = [
         point.dataset.date = p.rawDate || '';
         point.dataset.dateFormatted = formatFullDate(p.rawDate, p.d);
         point.dataset.metric = metric.key;
-        svg.appendChild(point);
+        seriesGroup.appendChild(point);
         attachTooltipHandlers(svg, point, metric);
 
         const label = formatValue(p.v, metric.key);
@@ -1787,14 +1992,15 @@ const METRICS = [
         const bx = cx - boxW/2;
         const by = cy - 22 - boxH/2;
 
-        svg.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
-        svg.appendChild(textEl(label, cx, by + boxH/2 + 4, {
+        seriesGroup.appendChild(roundRect(bx, by, boxW, boxH, 6, 'rgba(255,255,255,0.95)'));
+        seriesGroup.appendChild(textEl(label, cx, by + boxH/2 + 4, {
           size: textSize,
           weight: 900,
           fill: '#1f2a44',
           anchor: 'middle'
         }));
       }
+      svg.appendChild(seriesGroup);
     }
 
     return svg;
