@@ -1091,8 +1091,15 @@ const METRICS = [
   });
 
   btnNextSetup.addEventListener('click', () => {
-    setupStep = Math.min(setupStep + 1, setupSteps - 1);
-    updateSetupStep();
+    // Check if we are currently on the last step
+    if (setupStep === setupSteps - 1) {
+      // If so, close the modal (same logic as the close button)
+      setupModal.classList.remove('show');
+    } else {
+      // Otherwise, proceed to the next step
+      setupStep = Math.min(setupStep + 1, setupSteps - 1);
+      updateSetupStep();
+    }
   });
 
   btnBackSetup.addEventListener('click', () => {
